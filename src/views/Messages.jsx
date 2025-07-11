@@ -149,6 +149,40 @@ const withTimeout = async (promise, ms = 10000) => {
   return Promise.race([promise, timeout]);
 };
 
+// Predefined country codes for CEMAC zones, Canada, US
+const predefinedCountryCodes = {
+  'CM': '+237', // Cameroon
+  'CA': '+236', // Central African Republic
+  'TD': '+235', // Chad
+  'CG': '+242', // Republic of the Congo
+  'GQ': '+240', // Equatorial Guinea
+  'GA': '+241', // Gabon
+  'US': '+1', // United States
+  'CAN': '+1', // Canada
+};
+
+// Utility function to format phone number for WhatsApp (enhanced for Cameroon formats)
+const formatPhoneNumber = (phoneNumber, countryCode = null) => {
+  if (!phoneNumber) return null;
+  // Remove non-digit characters except +
+  let cleaned = phoneNumber.replace(/[^+\d]/g, '');
+  let code = countryCode ? predefinedCountryCodes[countryCode.toUpperCase()] || countryCode.replace(/\D/g, '') : '237'; // default to Cameroon
+  if (!code.startsWith('+')) code = `+${code}`;
+  // Remove leading zeros from local number
+  cleaned = cleaned.replace(/^0+/, '');
+  // If cleaned starts with the code without +, remove it to avoid duplication
+  if (cleaned.startsWith(code.substring(1))) {
+    cleaned = cleaned.substring(code.substring(1).length);
+  }
+  const full = `${code}${cleaned}`;
+  // Validate length based on country
+  const expectedLength = code === '+1' ? 12 : 13; // +1 for US/CAN (10 digits), 12 chars; +237 for CM (9 digits), 13 chars
+  if (full.length === expectedLength) {
+    return full;
+  }
+  return null;
+};
+
 // Role-based access control matrix
 const roleMatrix = {
   'Super Admin': {
@@ -179,11 +213,12 @@ const Messages = () => {
   const [companyId, setCompanyId] = useState(null);
   const [agencies, setAgencies] = useState([]);
   const [selectedAgencyId, setSelectedAgencyId] = useState('');
+  const [routes, setRoutes] = useState([]);
+  const [selectedRouteId, setSelectedRouteId] = useState('');
   const [reservations, setReservations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageContent, setMessageContent] = useState('');
   const [recipientType, setRecipientType] = useState('company');
-  const [selectedReservationId, setSelectedReservationId] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -275,9 +310,40 @@ const Messages = () => {
           setSelectedAgencyId(agenciesData[0].id);
         }
 
+        let routeQuery = supabase
+          .from('routes')
+          .select(`
+            id,
+            origin,
+            destination,
+            trip_date,
+            departure_time,
+            bus_id,
+            departure_agency_id,
+            arrival_agency_id,
+            buses!inner(bus_type)
+          `)
+          .eq('company_id', companyIdToUse)
+          .order('trip_date', { ascending: false })
+          .order('departure_time', { ascending: true });
+        if (!roleMatrix[activeRole]?.canViewAllAgencies && userAgenciesData.length > 0) {
+          const agencyIds = userAgenciesData.map((ua) => ua.agency_id);
+          routeQuery = routeQuery.or(
+            `departure_agency_id.in.(${agencyIds.join(',')}),arrival_agency_id.in.(${agencyIds.join(',')})`
+          );
+        }
+        const { data: routesData, error: routesError } = await withTimeout(routeQuery);
+        if (routesError) throw new Error(t('messages_routeFetchError', { error: routesError.message }));
+        setRoutes(routesData || []);
+
         let reservationQuery = supabase
           .from('reservations')
-          .select('id, agency_id, phone_number')
+          .select(`
+            id,
+            agency_id,
+            route_id,
+            user_id
+          `)
           .eq('company_id', companyIdToUse);
         if (!roleMatrix[activeRole]?.canViewAllAgencies && userAgenciesData.length > 0) {
           reservationQuery = reservationQuery.in('agency_id', userAgenciesData.map((ua) => ua.agency_id));
@@ -288,7 +354,7 @@ const Messages = () => {
 
         const { data: messagesData, error: messagesError } = await supabase
           .from('messages')
-          .select('id, agency_id, reservation_id, phone_number, message_content, channel, status, error_message, sent_at')
+          .select('id, agency_id, reservation_id, route_id, phone_number, message_content, channel, status, error_message, sent_at')
           .eq('company_id', companyIdToUse)
           .order('sent_at', { ascending: false });
         if (messagesError && messagesError.code !== '42P01') {
@@ -300,6 +366,7 @@ const Messages = () => {
           userId: session.user.id,
           companyId: companyIdToUse,
           agencyCount: agenciesData.length,
+          routeCount: routesData.length,
           reservationCount: reservationsData.length,
           messageCount: messagesData?.length || 0,
           role: activeRole,
@@ -325,7 +392,49 @@ const Messages = () => {
     fetchInitialData();
   }, [navigate, retryCount, t]);
 
-  // Send message to clients
+  // Fetch routes for selected agency
+  useEffect(() => {
+    if (!selectedAgencyId || !companyId) return;
+
+    const fetchRoutes = async () => {
+      try {
+        let routeQuery = supabase
+          .from('routes')
+          .select(`
+            id,
+            origin,
+            destination,
+            trip_date,
+            departure_time,
+            bus_id,
+            departure_agency_id,
+            arrival_agency_id,
+            buses!inner(bus_type)
+          `)
+          .eq('company_id', companyId)
+          .or(`departure_agency_id.eq.${selectedAgencyId},arrival_agency_id.eq.${selectedAgencyId}`)
+          .order('trip_date', { ascending: false })
+          .order('departure_time', { ascending: true });
+        if (userAgencies.length > 0 && !roleMatrix[userRole]?.canViewAllAgencies) {
+          const agencyIds = userAgencies.map((ua) => ua.agency_id);
+          routeQuery = routeQuery.or(
+            `departure_agency_id.in.(${agencyIds.join(',')}),arrival_agency_id.in.(${agencyIds.join(',')})`
+          );
+        }
+        const { data: routesData, error: routesError } = await withTimeout(routeQuery);
+        if (routesError) throw new Error(t('messages_routeFetchError', { error: routesError.message }));
+        setRoutes(routesData || []);
+        setSelectedRouteId('');
+      } catch (error) {
+        logError('RoutesFetch', error);
+        setError(t('messages_routeFetchError', { error: error.message }));
+      }
+    };
+
+    fetchRoutes();
+  }, [selectedAgencyId, companyId, userAgencies, userRole, t]);
+
+  // Send message to clients with WhatsApp and SMS fallback
   const sendMessage = useCallback(async () => {
     if (!roleMatrix[userRole]?.canSendMessages) {
       toast.error(t('messages_noPermissionSend'));
@@ -339,8 +448,8 @@ const Messages = () => {
       toast.error(t('messages_messageTooLong'));
       return;
     }
-    if (recipientType === 'reservation' && !selectedReservationId) {
-      toast.error(t('messages_selectReservationError'));
+    if (recipientType === 'route' && (!selectedAgencyId || !selectedRouteId)) {
+      toast.error(t('messages_selectAgencyRouteError'));
       return;
     }
     if (recipientType === 'agency' && !selectedAgencyId) {
@@ -350,14 +459,70 @@ const Messages = () => {
 
     try {
       setLoading(true);
+
+      // Fetch relevant reservations
+      let selectedReservations = [];
+      if (recipientType === 'route') {
+        selectedReservations = reservations.filter((res) => res.route_id === selectedRouteId && res.agency_id === selectedAgencyId);
+      } else if (recipientType === 'agency') {
+        selectedReservations = reservations.filter((res) => res.agency_id === selectedAgencyId);
+      } else {
+        selectedReservations = reservations;
+      }
+
+      if (selectedReservations.length === 0) {
+        throw new Error(t('messages_noReservationsFound'));
+      }
+
+      // Collect unique user_ids from selected reservations
+      const userIds = [...new Set(selectedReservations.map((res) => res.user_id).filter((id) => id))];
+
+      if (userIds.length === 0) {
+        throw new Error(t('messages_noUsersFound'));
+      }
+
+      // Fetch profiles for those user_ids
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, phone_number, country_code')
+        .in('id', userIds);
+
+      if (profilesError) throw new Error(t('messages_profilesFetchError', { error: profilesError.message }));
+
+      const profilesMap = new Map(profilesData.map((profile) => [profile.id, profile]));
+
+      // Collect and format phone numbers
+      let allPhoneNumbers = [];
+      selectedReservations.forEach((res) => {
+        const profile = profilesMap.get(res.user_id);
+        if (profile && profile.phone_number) {
+          allPhoneNumbers.push({ phone: profile.phone_number, code: profile.country_code });
+        }
+      });
+
+      const formattedPhones = allPhoneNumbers.map(({ phone, code }) => formatPhoneNumber(phone, code));
+      const validPhoneNumbers = formattedPhones.filter((phone) => phone);
+      const invalidPhoneDetails = allPhoneNumbers.filter((_, index) => !formattedPhones[index]);
+
+      if (invalidPhoneDetails.length > 0) {
+        console.warn(`Ignored ${invalidPhoneDetails.length} invalid phone numbers:`, invalidPhoneDetails.map(({ phone, code }) => ({ phone, code })));
+      }
+
+      if (validPhoneNumbers.length === 0) {
+        toast.warn(t('messages_noValidPhoneNumbers'));
+        return;
+      }
+
+      const uniqueValidPhoneNumbers = [...new Set(validPhoneNumbers)];
+
       const payload = {
         message: messageContent,
+        phone_numbers: uniqueValidPhoneNumbers,
         companyId,
-        ...(recipientType === 'reservation' && { reservationId: selectedReservationId }),
-        ...(recipientType === 'agency' && { agencyId: selectedAgencyId }),
+        channel: 'whatsapp', // Prioritize WhatsApp
       };
 
-      const response = await fetch('https://your-supabase-project.supabase.co/functions/v1/send_message', {
+      const response = await fetch('https://tiemlljkttqmragiaydg.supabase.co/functions/v1/send_message', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
@@ -374,22 +539,27 @@ const Messages = () => {
       const { results } = result;
       const sentCount = results.filter((r) => r.status === 'sent').length;
       const failedCount = results.length - sentCount;
+      const whatsappCount = results.filter((r) => r.status === 'sent' && r.channel === 'whatsapp').length;
+      const smsCount = results.filter((r) => r.status === 'sent' && r.channel === 'sms').length;
 
       if (results.length > 0) {
         const messageInserts = results.map((r) => ({
           company_id: companyId,
-          agency_id: recipientType === 'agency' ? selectedAgencyId : null,
-          reservation_id: recipientType === 'reservation' ? selectedReservationId : null,
+          agency_id: recipientType === 'agency' || recipientType === 'route' ? selectedAgencyId : null,
+          reservation_id: null,
+          route_id: recipientType === 'route' ? selectedRouteId : null,
           phone_number: r.phone_number,
           message_content: messageContent,
           channel: r.channel,
           status: r.status,
           error_message: r.error || null,
           sent_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         }));
 
         const { error: insertError } = await supabase.from('messages').insert(messageInserts);
-        if (insertError && insertError.code !== '42P01') {
+        if (insertError) {
           logError('MessageInsert', insertError);
           toast.warn(t('messages_messageInsertError'));
         } else {
@@ -400,10 +570,17 @@ const Messages = () => {
       if (sentCount === 0) {
         toast.warn(t('messages_noMessagesSent'));
       } else {
-        toast.success(t('messages_messageSentSuccess', { count: sentCount, failed: failedCount }));
+        toast.success(
+          t('messages_messageSentSuccess', {
+            count: sentCount,
+            failed: failedCount,
+            whatsapp: whatsappCount,
+            sms: smsCount,
+          })
+        );
       }
       setMessageContent('');
-      setSelectedReservationId('');
+      setSelectedRouteId('');
       setRecipientType('company');
     } catch (error) {
       logError('SendMessage', error);
@@ -411,7 +588,7 @@ const Messages = () => {
     } finally {
       setLoading(false);
     }
-  }, [messageContent, recipientType, selectedReservationId, selectedAgencyId, companyId, userRole, t]);
+  }, [messageContent, recipientType, selectedRouteId, selectedAgencyId, companyId, userRole, reservations, t]);
 
   // Permission check for page access
   if (!roleMatrix[userRole]?.canViewMessages) {
@@ -594,7 +771,7 @@ const Messages = () => {
                           value={recipientType}
                           onChange={(e) => {
                             setRecipientType(e.target.value);
-                            setSelectedReservationId('');
+                            setSelectedRouteId('');
                             setSelectedAgencyId(agencies[0]?.id || '');
                           }}
                           variant="outlined"
@@ -604,17 +781,20 @@ const Messages = () => {
                         >
                           <MenuItem value="company">{t('messages_allClients')}</MenuItem>
                           <MenuItem value="agency">{t('messages_agencyClients')}</MenuItem>
-                          <MenuItem value="reservation">{t('messages_specificReservation')}</MenuItem>
+                          <MenuItem value="route">{t('messages_routeClients')}</MenuItem>
                         </TextField>
                       </Grid>
-                      {recipientType === 'agency' && (
+                      {(recipientType === 'agency' || recipientType === 'route') && (
                         <Grid item xs={12} md={4}>
                           <TextField
                             select
                             fullWidth
                             label={t('messages_selectAgency')}
                             value={selectedAgencyId}
-                            onChange={(e) => setSelectedAgencyId(e.target.value)}
+                            onChange={(e) => {
+                              setSelectedAgencyId(e.target.value);
+                              setSelectedRouteId('');
+                            }}
                             variant="outlined"
                             helperText={t('messages_chooseAgency')}
                             InputProps={{ startAdornment: <MessageIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
@@ -628,25 +808,27 @@ const Messages = () => {
                           </TextField>
                         </Grid>
                       )}
-                      {recipientType === 'reservation' && (
+                      {recipientType === 'route' && (
                         <Grid item xs={12} md={4}>
                           <TextField
                             select
                             fullWidth
-                            label={t('messages_selectReservation')}
-                            value={selectedReservationId}
-                            onChange={(e) => setSelectedReservationId(e.target.value)}
+                            label={t('messages_selectRoute')}
+                            value={selectedRouteId}
+                            onChange={(e) => setSelectedRouteId(e.target.value)}
                             variant="outlined"
-                            helperText={t('messages_chooseReservation')}
+                            helperText={t('messages_chooseRoute')}
                             InputProps={{ startAdornment: <MessageIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
-                            aria-label={t('messages_selectReservation')}
+                            aria-label={t('messages_selectRoute')}
                           >
-                            <MenuItem value="">{t('messages_chooseReservation')}</MenuItem>
-                            {reservations.map((reservation) => (
-                              <MenuItem key={reservation.id} value={reservation.id}>
-                                {t('messages_reservationLabel', { id: reservation.id })}
-                              </MenuItem>
-                            ))}
+                            <MenuItem value="">{t('messages_chooseRoute')}</MenuItem>
+                            {routes
+                              .filter((route) => route.departure_agency_id === selectedAgencyId || route.arrival_agency_id === selectedAgencyId)
+                              .map((route) => (
+                                <MenuItem key={route.id} value={route.id}>
+                                  {`${route.origin} to ${route.destination} - ${new Date(route.trip_date).toLocaleDateString()} ${route.departure_time} - ${route.buses?.bus_type || 'Unknown'}`}
+                                </MenuItem>
+                              ))}
                           </TextField>
                         </Grid>
                       )}
@@ -662,8 +844,12 @@ const Messages = () => {
                           inputProps={{ maxLength: 160 }}
                           variant="outlined"
                           helperText={
-                            recipientType === 'reservation'
-                              ? t('messages_reservationRecipient', { id: selectedReservationId || 'N/A' })
+                            recipientType === 'route'
+                              ? t('messages_routeRecipient', {
+                                  route: routes.find((r) => r.id === selectedRouteId)
+                                    ? `${routes.find((r) => r.id === selectedRouteId).origin} to ${routes.find((r) => r.id === selectedRouteId).destination} - ${new Date(routes.find((r) => r.id === selectedRouteId).trip_date).toLocaleDateString()} ${routes.find((r) => r.id === selectedRouteId).departure_time}`
+                                    : 'N/A',
+                                })
                               : recipientType === 'agency'
                               ? t('messages_agencyRecipient', { name: agencies.find((a) => a.id === selectedAgencyId)?.name || t('messages_agency') })
                               : t('messages_companyRecipient')
@@ -755,8 +941,12 @@ const Messages = () => {
                                   <TableCell>
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                       <MessageIcon sx={{ mr: 1, color: theme.palette.info.main }} />
-                                      {message.reservation_id
-                                        ? t('messages_reservationLabel', { id: message.reservation_id })
+                                      {message.route_id
+                                        ? t('messages_routeLabel', {
+                                            route: routes.find((r) => r.id === message.route_id)
+                                              ? `${routes.find((r) => r.id === message.route_id).origin} to ${routes.find((r) => r.id === message.route_id).destination} - ${new Date(routes.find((r) => r.id === message.route_id).trip_date).toLocaleDateString()} ${routes.find((r) => r.id === message.route_id).departure_time}`
+                                              : 'N/A',
+                                          })
                                         : message.agency_id
                                         ? t('messages_agencyLabel', { name: agencies.find((a) => a.id === message.agency_id)?.name || 'N/A' })
                                         : t('messages_allClientsLabel')}

@@ -178,6 +178,8 @@ const roleMatrix = {
     canCreateRoute: true,
     canUpdateRoute: true,
     canDeleteRoute: true,
+    canEditAllRoutes: true, // New permission
+    canDeleteAllRoutes: true, // New permission
     canViewAgencies: true,
     canCreateAgency: true,
     canUpdateAgency: true,
@@ -189,6 +191,8 @@ const roleMatrix = {
     canCreateRoute: true,
     canUpdateRoute: true,
     canDeleteRoute: true,
+    canEditAllRoutes: true, // New permission
+    canDeleteAllRoutes: true, // New permission
     canViewAgencies: true,
     canCreateAgency: true,
     canUpdateAgency: true,
@@ -200,6 +204,8 @@ const roleMatrix = {
     canCreateRoute: false,
     canUpdateRoute: false,
     canDeleteRoute: false,
+    canEditAllRoutes: false,
+    canDeleteAllRoutes: false,
     canViewAgencies: true,
     canCreateAgency: false,
     canUpdateAgency: false,
@@ -211,6 +217,8 @@ const roleMatrix = {
     canCreateRoute: false,
     canUpdateRoute: false,
     canDeleteRoute: false,
+    canEditAllRoutes: false,
+    canDeleteAllRoutes: false,
     canViewAgencies: true,
     canCreateAgency: false,
     canUpdateAgency: false,
@@ -1875,7 +1883,7 @@ const RoutePlanning = () => {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
         <CircularProgress aria-label={t('loading')} />
-              </Box>
+      </Box>
     );
   }
 
@@ -2073,7 +2081,7 @@ const RoutePlanning = () => {
                                 {t('route_passengers')}
                               </Box>
                             </TableCell>
-                            {roleMatrix[userRole]?.canUpdateRoute && (
+                            {(roleMatrix[userRole]?.canUpdateRoute || roleMatrix[userRole]?.canDeleteRoute) && (
                               <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
                                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                                   {t('route_actions')}
@@ -2205,34 +2213,38 @@ const RoutePlanning = () => {
                                     {passengerCount}
                                   </Box>
                                 </TableCell>
-                                {roleMatrix[userRole]?.canUpdateRoute && (
+                                {(roleMatrix[userRole]?.canUpdateRoute || roleMatrix[userRole]?.canDeleteRoute) && (
                                   <TableCell align="right">
-                                    <Tooltip title={t('route_edit')}>
-                                      <span>
-                                        <IconButton
-                                          color="primary"
-                                          onClick={() => startEdit(route)}
-                                          disabled={route.is_booked}
-                                          sx={{ '&:hover': { transform: 'scale(1.1)' } }}
-                                          aria-label={t('route_edit')}
-                                        >
-                                          <EditIcon />
-                                        </IconButton>
-                                      </span>
-                                    </Tooltip>
-                                    <Tooltip title={t('route_delete')}>
-                                      <span>
-                                        <IconButton
-                                          color="error"
-                                          onClick={() => deleteRoute(route.id)}
-                                          disabled={route.is_booked || !roleMatrix[userRole]?.canDeleteRoute}
-                                          sx={{ '&:hover': { transform: 'scale(1.1)' } }}
-                                          aria-label={t('route_delete')}
-                                        >
-                                          <DeleteIcon />
-                                        </IconButton>
-                                      </span>
-                                    </Tooltip>
+                                    {roleMatrix[userRole]?.canUpdateRoute && (
+                                      <Tooltip title={t('route_edit')}>
+                                        <span>
+                                          <IconButton
+                                            color="primary"
+                                            onClick={() => startEdit(route)}
+                                            disabled={route.is_booked}
+                                            sx={{ '&:hover': { transform: 'scale(1.1)' } }}
+                                            aria-label={t('route_edit')}
+                                          >
+                                            <EditIcon />
+                                          </IconButton>
+                                        </span>
+                                      </Tooltip>
+                                    )}
+                                    {roleMatrix[userRole]?.canDeleteRoute && (
+                                      <Tooltip title={t('route_delete')}>
+                                        <span>
+                                          <IconButton
+                                            color="error"
+                                            onClick={() => deleteRoute(route.id)}
+                                            disabled={route.is_booked}
+                                            sx={{ '&:hover': { transform: 'scale(1.1)' } }}
+                                            aria-label={t('route_delete')}
+                                          >
+                                            <DeleteIcon />
+                                          </IconButton>
+                                        </span>
+                                      </Tooltip>
+                                    )}
                                   </TableCell>
                                 )}
                               </TableRow>
