@@ -4,37 +4,24 @@ import jsconfigPaths from 'vite-jsconfig-paths';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const API_URL = `${env.VITE_APP_BASE_NAME}`;
-  // this sets a default port to 3000
-  const PORT = `${'3000'}`;
+  const PORT = '3000';
 
   return {
     server: {
-      // this ensures that the browser opens upon server start
       open: true,
-      port: PORT
+      port: PORT,
     },
     define: {
-      global: 'window'
+      global: 'window',
     },
-    resolve: {
-      //     alias: [
-      //       {
-      //         find: /^~(.+)/,
-      //         replacement: path.join(process.cwd(), 'node_modules/$1')
-      //       },
-      //       {
-      //         find: /^src(.+)/,
-      //         replacement: path.join(process.cwd(), 'src/$1')
-      //       }
-      //     ]
+    build: {
+      outDir: 'dist', // Explicitly set output to dist
     },
     preview: {
-      // this ensures that the browser opens upon preview start
       open: true,
-      port: PORT
+      port: PORT,
     },
-    base: API_URL,
-    plugins: [react(), jsconfigPaths()]
+    base: '/', // Root for Firebase Hosting
+    plugins: [react(), jsconfigPaths()],
   };
 });

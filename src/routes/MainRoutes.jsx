@@ -69,7 +69,7 @@ const Messages = Loadable(lazy(() => import('../views/Messages')));
 const Actions = Loadable(lazy(() => import('../views/Actions')));
 const CreateTransportCompany = Loadable(lazy(() => import('../views/CreateTransportCompany/CreateTransportCompany')));
 const ManageTransportCompany = Loadable(lazy(() => import('../views/ManageTransportCompany')));
-const JoinAgency = Loadable(lazy(() => import('../views/JoinAgency')));
+
 const Login = Loadable(lazy(() => import('../views/Login')));
 const Register = Loadable(lazy(() => import('../views/Register/AuthRegister')));
 const Logout = Loadable(lazy(() => import('../views/Logout/AuthLogout')));
@@ -108,7 +108,7 @@ const MainRoutes = {
             { path: '/actions', element: <Actions />, key: 'actions' },
             { path: '/create-transport-company', element: <CreateTransportCompany />, key: 'create-company' },
             { path: '/manage-transport-company', element: <ManageTransportCompany />, key: 'manage-company' },
-            { path: '/join-agency', element: <JoinAgency />, key: 'join-agency' }
+
           ]
         }
       ]

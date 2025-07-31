@@ -139,9 +139,6 @@ const DiagnosticOverlay = ({ error, onRetry }) => {
             : 'Erreur critique'}
         </Typography>
         <Typography>{error?.message || 'Erreur inattendue.'}</Typography>
-        <Typography variant="caption">
-          Vérifiez les logs ou contactez le support.
-        </Typography>
         <Button
           onClick={() => setShowDetails(!showDetails)}
           sx={{ mt: 1 }}
@@ -366,7 +363,7 @@ const AuthLogin = ({ ...rest }) => {
           name: values.name || 'Nouveau Utilisateur',
           email: values.email,
           phone: values.phone || '+000000000',
-          role: values.role || 'Ticketing Agent',
+          role: 'Super Admin',
           permissions: [],
           status: 'active',
         },
@@ -495,7 +492,7 @@ const AuthLogin = ({ ...rest }) => {
         <Formik
           initialValues={
             signUpMode
-              ? { name: '', email: '', phone: '', password: '', role: 'Ticketing Agent', submit: null }
+              ? { name: '', email: '', phone: '', password: '', submit: null }
               : { email: '', password: '', submit: null }
           }
           validationSchema={
@@ -515,12 +512,6 @@ const AuthLogin = ({ ...rest }) => {
                   password: Yup.string()
                     .min(8, 'Mot de passe trop court')
                     .required('Mot de passe requis'),
-                  role: Yup.string()
-                    .oneOf(
-                      ['Super Admin', 'Operations Manager', 'Agent Supervisor', 'Ticketing Agent'],
-                      'Rôle invalide'
-                    )
-                    .required('Rôle requis'),
                 })
               : Yup.object().shape({
                   email: Yup.string()
@@ -572,25 +563,6 @@ const AuthLogin = ({ ...rest }) => {
                     value={values.phone}
                     variant="outlined"
                   />
-                  <TextField
-                    select
-                    fullWidth
-                    error={Boolean(touched.role && errors.role)}
-                    helperText={touched.role && errors.role}
-                    label="Rôle"
-                    margin="normal"
-                    name="role"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    value={values.role}
-                    variant="outlined"
-                    SelectProps={{ native: true }}
-                  >
-                    <option value="Super Admin">Super Admin</option>
-                    <option value="Operations Manager">Operations Manager</option>
-                    <option value="Agent Supervisor">Agent Supervisor</option>
-                    <option value="Ticketing Agent">Ticketing Agent</option>
-                  </TextField>
                 </>
               )}
               <EmailInput

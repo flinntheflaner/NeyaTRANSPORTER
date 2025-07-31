@@ -4,33 +4,15 @@ import React from 'react';
 import { useTheme } from '@mui/material/styles';
 import {
   Button,
-  Chip,
+  Popper,
+  Paper,
   ClickAwayListener,
   Fade,
-  Grid,
-  Paper,
-  Popper,
-  Avatar,
-  List,
-  ListItemAvatar,
-  ListItemText,
-  ListSubheader,
-  ListItemSecondaryAction,
-  Typography,
-  ListItemButton
+  List
 } from '@mui/material';
 
-// third party
-import PerfectScrollbar from 'react-perfect-scrollbar';
-
 // assets
-import QueryBuilderTwoToneIcon from '@mui/icons-material/QueryBuilderTwoTone';
 import NotificationsNoneTwoToneIcon from '@mui/icons-material/NotificationsNoneTwoTone';
-
-import User1 from 'assets/images/users/avatar-1.jpg';
-import User2 from 'assets/images/users/avatar-2.jpg';
-import User3 from 'assets/images/users/avatar-3.jpg';
-import User4 from 'assets/images/users/avatar-4.jpg';
 
 // ==============================|| NOTIFICATION ||============================== //
 
@@ -109,122 +91,6 @@ const NotificationSection = () => {
                     borderRadius: '10px'
                   }}
                 >
-                  <PerfectScrollbar style={{ height: 320, overflowX: 'hidden' }}>
-                    <ListSubheader disableSticky>
-                      <Chip size="small" color="primary" label="New" />
-                    </ListSubheader>
-                    <ListItemButton alignItems="flex-start" sx={{ pt: 0 }}>
-                      <ListItemAvatar>
-                        <Avatar alt="John Doe" src={User1} />
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={<Typography variant="subtitle1">John Doe</Typography>}
-                        secondary={<Typography variant="subtitle2">New ticket Added</Typography>}
-                      />
-                      <ListItemSecondaryAction sx={{ top: 22 }}>
-                        <Grid container justifyContent="flex-end">
-                          <Grid item>
-                            <QueryBuilderTwoToneIcon
-                              sx={{
-                                fontSize: '0.75rem',
-                                mr: 0.5,
-                                color: theme.palette.grey[400]
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Typography variant="caption" display="block" gutterBottom sx={{ color: theme.palette.grey[400] }}>
-                              now
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
-                    <ListSubheader disableSticky>
-                      <Chip size="small" variant="outlined" label="EARLIER" />
-                    </ListSubheader>
-                    <ListItemButton alignItems="flex-start" sx={{ pt: 0 }}>
-                      <ListItemAvatar>
-                        <Avatar alt="Joseph William" src={User2} />
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={<Typography variant="subtitle1">Joseph William</Typography>}
-                        secondary={<Typography variant="subtitle2">Purchase a new product</Typography>}
-                      />
-                      <ListItemSecondaryAction sx={{ top: 20 }}>
-                        <Grid container justifyContent="flex-end">
-                          <Grid item>
-                            <QueryBuilderTwoToneIcon
-                              sx={{
-                                fontSize: '0.75rem',
-                                mr: 0.5,
-                                color: theme.palette.grey[400]
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Typography variant="caption" display="block" gutterBottom sx={{ color: theme.palette.grey[400] }}>
-                              10 min
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
-                    <ListItemButton alignItems="flex-start">
-                      <ListItemAvatar>
-                        <Avatar alt="Sara Soudein" src={User3} />
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={<Typography variant="subtitle1">Sara Soudein</Typography>}
-                        secondary={<Typography variant="subtitle2">Currently Login</Typography>}
-                      />
-                      <ListItemSecondaryAction sx={{ top: 30 }}>
-                        <Grid container justifyContent="flex-end">
-                          <Grid item>
-                            <QueryBuilderTwoToneIcon
-                              sx={{
-                                fontSize: '0.75rem',
-                                mr: 0.5,
-                                color: theme.palette.grey[400]
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Typography variant="caption" display="block" gutterBottom sx={{ color: theme.palette.grey[400] }}>
-                              12 min
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
-                    <ListItemButton alignItems="flex-start">
-                      <ListItemAvatar>
-                        <Avatar alt="Sepha Wilon" src={User4} />
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={<Typography variant="subtitle1">Sepha Wilon</Typography>}
-                        secondary={<Typography variant="subtitle2">Purchase a new product</Typography>}
-                      />
-                      <ListItemSecondaryAction sx={{ top: 30 }}>
-                        <Grid container justifyContent="flex-end">
-                          <Grid item>
-                            <QueryBuilderTwoToneIcon
-                              sx={{
-                                fontSize: '0.75rem',
-                                mr: 0.5,
-                                color: theme.palette.grey[400]
-                              }}
-                            />
-                          </Grid>
-                          <Grid item>
-                            <Typography variant="caption" display="block" gutterBottom sx={{ color: theme.palette.grey[400] }}>
-                              30 min
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
-                  </PerfectScrollbar>
                 </List>
               </ClickAwayListener>
             </Paper>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import {
@@ -35,6 +35,286 @@ import autoTable from 'jspdf-autotable';
 
 // Enterprise logo (base64 placeholder)
 const ENTERPRISE_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
+
+// Translations
+const translations = {
+  en: {
+    reservation_error: 'Error',
+    reservation_unknownError: 'Unknown error: {error}',
+    reservation_errorDetails: 'Details: {details}',
+    reservation_noDetails: 'No details available',
+    reservation_refreshOrContact: 'Please refresh the page or contact support.',
+    reservation_session_failed: 'Failed to get session: {error}',
+    reservation_login_required: 'Login required',
+    reservation_user_failed: 'Failed to fetch user: {error}',
+    reservation_no_permission_view: 'You do not have permission to view reservations',
+    reservation_user_agencies_failed: 'Failed to fetch user agencies: {error}',
+    reservation_no_company: 'No company associated with this user',
+    reservation_company_failed: 'Failed to fetch company: {error}',
+    reservation_agencies_failed: 'Failed to fetch agencies: {error}',
+    reservation_buses_failed: 'Failed to fetch buses: {error}',
+    reservation_routes_failed: 'Failed to fetch routes: {error}',
+    reservation_db_error: 'Database error: {code}',
+    reservation_fetch_failed: 'Failed to fetch data: {error}',
+    reservation_reservations_failed: 'Failed to fetch reservations: {error}',
+    reservation_passenger_assignments_failed: 'Failed to fetch passenger assignments for reservation {id}: {error}',
+    reservation_profile_failed: 'Failed to fetch profile: {error}',
+    reservation_no_permission_create: 'You do not have permission to create reservations',
+    reservation_full_name_required: 'Full name is required',
+    reservation_invalid_phone: 'Invalid phone number format (+2376xxxxxxxx)',
+    reservation_invalid_seat: 'Seat number must be between 1 and 99',
+    reservation_departure_required: 'Departure date and time are required',
+    reservation_reservation_required: 'Reservation date and time are required',
+    reservation_past_trip: 'Cannot book a trip in the past',
+    reservation_reservation_before_departure: 'Reservation must be before departure',
+    reservation_reservation_no_future: 'Reservation cannot be in the future',
+    reservation_no_trip_exists: 'No trip exists for {origin} to {destination} on {date} at {time}',
+    reservation_seat_taken: 'Seat already taken',
+    reservation_no_seats: 'No seats available for this trip',
+    reservation_insert_failed: 'Failed to insert reservation: {error}',
+    reservation_passenger_insert_failed: 'Failed to insert passenger assignment: {error}',
+    reservation_fetch_new_failed: 'Failed to fetch new reservation: {error}',
+    reservation_booking_added: 'Booking added successfully',
+    reservation_no_permission_export: 'You do not have permission to export reports',
+    reservation_export_required: 'Origin, destination, and period are required for export',
+    reservation_pdf_exported: 'PDF exported successfully',
+    reservation_pdf_failed: 'Failed to export PDF',
+    reservation_tracking: 'Reservation Tracking',
+    reservation_add_booking: 'Add Booking',
+    reservation_export_origin: 'Export Origin',
+    reservation_select_origin_export: 'Select origin for export',
+    reservation_export_destination: 'Export Destination',
+    reservation_select_destination_export: 'Select destination for export',
+    reservation_export_period: 'Export Period',
+    reservation_select_period_export: 'Select period for export',
+    reservation_export_pdf: 'Export to PDF',
+    reservation_no_reservations: 'No reservations found',
+    reservation_departure_agency: 'Departure Agency',
+    reservation_arrival_agency: 'Arrival Agency',
+    reservation_origin: 'Origin',
+    reservation_destination: 'Destination',
+    reservation_departure: 'Departure',
+    reservation_arrival: 'Arrival',
+    reservation_bus_type: 'Bus Type',
+    reservation_price: 'Price',
+    reservation_passenger_count: 'Passenger Count',
+    reservation_reservation_status: 'Reservation Status',
+    reservation_payment_status: 'Payment Status',
+    reservation_online_booking: 'Online Booking',
+    reservation_passenger_index: '#',
+    reservation_full_name: 'Full Name',
+    reservation_phone_number: 'Phone Number',
+    reservation_seat_number: 'Seat Number',
+    reservation_passenger_number: 'Passenger Number',
+    reservation_government_id: 'Government ID',
+    reservation_reservation_date: 'Reservation Date',
+    reservation_passenger_created: 'Passenger Assignment Created',
+    reservation_add_new_booking: 'Add New Booking',
+    reservation_select_origin: 'Select Origin',
+    reservation_select_destination: 'Select Destination',
+    reservation_departure_date: 'Departure Date',
+    reservation_departure_time: 'Departure Time',
+    reservation_no_time_slots: 'No time slots available',
+    reservation_select_time: 'Select Time',
+    reservation_enter_full_name: 'Enter full name',
+    reservation_passenger_full_name: "Enter passenger's full name",
+    reservation_enter_phone: 'Enter phone number (+2376xxxxxxxx)',
+    reservation_enter_seat: 'Enter seat number (1-99)',
+    reservation_seat_helper: 'Enter seat number',
+    reservation_select_payment: 'Select payment status',
+    reservation_paid: 'Paid',
+    reservation_pending: 'Pending',
+    reservation_id_verified: 'Government ID Verified',
+    reservation_online_booking_label: 'Online Booking',
+    reservation_reservation_date_label: 'Reservation Date',
+    reservation_reservation_time: 'Reservation Time',
+    reservation_select_reservation_time: 'Select reservation time',
+    reservation_add: 'Add',
+    reservation_cancel: 'Cancel',
+    reservation_no_agencies: 'No agencies found',
+    reservation_contact_support: 'Please contact support to associate agencies with your account',
+    reservation_return_dashboard: 'Return to Dashboard',
+    reservation_loading: 'Loading',
+    reservation_retry: 'Retry',
+    reservation_pdf_title: 'Passenger Verification Report',
+    reservation_pdf_route: 'Route: {origin} to {destination}',
+    reservation_pdf_trip_date: 'Trip Date: {period}',
+    reservation_pdf_generated: 'Generated: {date}',
+    reservation_pdf_company: 'Company: {companyName}',
+    reservation_pdf_summary: 'Summary',
+    reservation_pdf_total_res: 'Total Reservations: {count}',
+    reservation_pdf_total_pass: 'Total Passengers: {count}',
+    reservation_pdf_headers: [
+      '#', 'Passenger Name', 'Departure Agency', 'Arrival Agency', 'Origin', 'Destination', 'Departure', 'Bus Type',
+      'Price', 'Phone Number', 'Seat Number', 'Payment Status', 'Government ID', 'Reservation Date', 'Booking Type'
+    ],
+  },
+  fr: {
+    reservation_error: 'Erreur',
+    reservation_unknownError: 'Erreur inconnue : {error}',
+    reservation_errorDetails: 'Détails : {details}',
+    reservation_noDetails: 'Aucun détail disponible',
+    reservation_refreshOrContact: 'Veuillez rafraîchir la page ou contacter le support.',
+    reservation_session_failed: 'Échec de l\'obtention de la session : {error}',
+    reservation_login_required: 'Connexion requise',
+    reservation_user_failed: 'Échec de la récupération de l\'utilisateur : {error}',
+    reservation_no_permission_view: "Vous n'avez pas la permission de voir les réservations",
+    reservation_user_agencies_failed: 'Échec de la récupération des agences utilisateur : {error}',
+    reservation_no_company: 'Aucune entreprise associée à cet utilisateur',
+    reservation_company_failed: 'Échec de la récupération de l\'entreprise : {error}',
+    reservation_agencies_failed: 'Échec de la récupération des agences : {error}',
+    reservation_buses_failed: 'Échec de la récupération des bus : {error}',
+    reservation_routes_failed: 'Échec de la récupération des itinéraires : {error}',
+    reservation_db_error: 'Erreur de base de données : {code}',
+    reservation_fetch_failed: 'Échec de la récupération des données : {error}',
+    reservation_reservations_failed: 'Échec de la récupération des réservations : {error}',
+    reservation_passenger_assignments_failed: 'Échec de la récupération des affectations de passagers pour la réservation {id} : {error}',
+    reservation_profile_failed: 'Échec de la récupération du profil : {error}',
+    reservation_no_permission_create: "Vous n'avez pas la permission de créer des réservations",
+    reservation_full_name_required: 'Le nom complet est requis',
+    reservation_invalid_phone: 'Format de numéro de téléphone invalide (+2376xxxxxxxx)',
+    reservation_invalid_seat: 'Le numéro de siège doit être entre 1 et 99',
+    reservation_departure_required: 'La date et l\'heure de départ sont requises',
+    reservation_reservation_required: 'La date et l\'heure de réservation sont requises',
+    reservation_past_trip: 'Impossible de réserver un voyage dans le passé',
+    reservation_reservation_before_departure: 'La réservation doit être avant le départ',
+    reservation_reservation_no_future: 'La réservation ne peut pas être dans le futur',
+    reservation_no_trip_exists: 'Aucun voyage n\'existe pour {origin} à {destination} le {date} à {time}',
+    reservation_seat_taken: 'Siège déjà pris',
+    reservation_no_seats: 'Aucun siège disponible pour ce voyage',
+    reservation_insert_failed: 'Échec de l\'insertion de la réservation : {error}',
+    reservation_passenger_insert_failed: 'Échec de l\'insertion de l\'affectation de passager : {error}',
+    reservation_fetch_new_failed: 'Échec de la récupération de la nouvelle réservation : {error}',
+    reservation_booking_added: 'Réservation ajoutée avec succès',
+    reservation_no_permission_export: "Vous n'avez pas la permission d'exporter des rapports",
+    reservation_export_required: 'Origine, destination et période sont requis pour l\'export',
+    reservation_pdf_exported: 'PDF exporté avec succès',
+    reservation_pdf_failed: 'Échec de l\'export PDF',
+    reservation_tracking: 'Suivi des Réservations',
+    reservation_add_booking: 'Ajouter une Réservation',
+    reservation_export_origin: 'Exporter Origine',
+    reservation_select_origin_export: 'Sélectionnez l\'origine pour l\'export',
+    reservation_export_destination: 'Exporter Destination',
+    reservation_select_destination_export: 'Sélectionnez la destination pour l\'export',
+    reservation_export_period: 'Exporter Période',
+    reservation_select_period_export: 'Sélectionnez la période pour l\'export',
+    reservation_export_pdf: 'Exporter en PDF',
+    reservation_no_reservations: 'Aucune réservation trouvée',
+    reservation_departure_agency: 'Agence de Départ',
+    reservation_arrival_agency: 'Agence d\'Arrivée',
+    reservation_origin: 'Origine',
+    reservation_destination: 'Destination',
+    reservation_departure: 'Départ',
+    reservation_arrival: 'Arrivée',
+    reservation_bus_type: 'Type de Bus',
+    reservation_price: 'Prix',
+    reservation_passenger_count: 'Nombre de Passagers',
+    reservation_reservation_status: 'Statut de Réservation',
+    reservation_payment_status: 'Statut de Paiement',
+    reservation_online_booking: 'Réservation en Ligne',
+    reservation_passenger_index: '#',
+    reservation_full_name: 'Nom Complet',
+    reservation_phone_number: 'Numéro de Téléphone',
+    reservation_seat_number: 'Numéro de Siège',
+    reservation_passenger_number: 'Numéro de Passager',
+    reservation_government_id: 'ID Gouvernemental',
+    reservation_reservation_date: 'Date de Réservation',
+    reservation_passenger_created: 'Création d\'Affectation de Passager',
+    reservation_add_new_booking: 'Ajouter une Nouvelle Réservation',
+    reservation_select_origin: 'Sélectionnez l\'Origine',
+    reservation_select_destination: 'Sélectionnez la Destination',
+    reservation_departure_date: 'Date de Départ',
+    reservation_departure_time: 'Heure de Départ',
+    reservation_no_time_slots: 'Aucun créneau horaire disponible',
+    reservation_select_time: 'Sélectionnez l\'Heure',
+    reservation_enter_full_name: 'Entrez le nom complet',
+    reservation_passenger_full_name: 'Entrez le nom complet du passager',
+    reservation_enter_phone: 'Entrez le numéro de téléphone (+2376xxxxxxxx)',
+    reservation_enter_seat: 'Entrez le numéro de siège (1-99)',
+    reservation_seat_helper: 'Entrez le numéro de siège',
+    reservation_select_payment: 'Sélectionnez le statut de paiement',
+    reservation_paid: 'Payé',
+    reservation_pending: 'En Attente',
+    reservation_id_verified: 'ID Gouvernemental Vérifié',
+    reservation_online_booking_label: 'Réservation en Ligne',
+    reservation_reservation_date_label: 'Date de Réservation',
+    reservation_reservation_time: 'Heure de Réservation',
+    reservation_select_reservation_time: 'Sélectionnez l\'heure de réservation',
+    reservation_add: 'Ajouter',
+    reservation_cancel: 'Annuler',
+    reservation_no_agencies: 'Aucune agence trouvée',
+    reservation_contact_support: 'Veuillez contacter le support pour associer des agences à votre compte',
+    reservation_return_dashboard: 'Retour au Tableau de Bord',
+    reservation_loading: 'Chargement',
+    reservation_retry: 'Réessayer',
+    reservation_pdf_title: 'Rapport de Vérification des Passagers',
+    reservation_pdf_route: 'Itinéraire : {origin} à {destination}',
+    reservation_pdf_trip_date: 'Date du Voyage : {period}',
+    reservation_pdf_generated: 'Généré : {date}',
+    reservation_pdf_company: 'Entreprise : {companyName}',
+    reservation_pdf_summary: 'Résumé',
+    reservation_pdf_total_res: 'Réservations Totales : {count}',
+    reservation_pdf_total_pass: 'Passagers Totaux : {count}',
+    reservation_pdf_headers: [
+      '#', 'Nom du Passager', 'Agence de Départ', 'Agence d\'Arrivée', 'Origine', 'Destination', 'Départ', 'Type de Bus',
+      'Prix', 'Numéro de Téléphone', 'Numéro de Siège', 'Statut de Paiement', 'ID Gouvernemental', 'Date de Réservation', 'Type de Réservation'
+    ],
+  },
+};
+
+// Breadcrumb Component
+const Breadcrumb = ({ title, children, language, setLanguage }) => (
+  <Box sx={{ mb: 2, transition: 'all 0.3s ease-in-out' }}>
+    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {title}
+      </Box>
+      <Select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        size="small"
+        sx={{ minWidth: 60 }}
+      >
+        <MenuItem value="en">EN</MenuItem>
+        <MenuItem value="fr">FR</MenuItem>
+      </Select>
+    </Typography>
+    <Box sx={{ mt: 1 }}>{children}</Box>
+  </Box>
+);
+
+// Error Boundary Component
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null, errorInfo: null };
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    this.setState({ errorInfo });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h6" color="error">
+            {this.props.t('reservation_error')}: {this.state.error?.message || this.props.t('reservation_unknownError', { error: 'Unknown' })}
+          </Typography>
+          <Typography variant="body2">
+            {this.props.t('reservation_errorDetails', { details: this.state.errorInfo?.componentStack || this.props.t('reservation_noDetails') })}
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            {this.props.t('reservation_refreshOrContact')}
+          </Typography>
+        </Box>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Theme setup
 const theme = createTheme({
@@ -141,11 +421,11 @@ const roleMatrix = {
   },
   'Ticketing Agent': {
     canViewReservations: true,
-    canCreateReservation: true,
+    canCreateReservation: false,
     canUpdateReservation: false,
     canDeleteReservation: false,
     canViewAnalytics: false,
-    canGenerateReports: false,
+    canGenerateReports: true,
     canViewAgencies: true,
     canCreateAgency: false,
     canRequestElevation: false,
@@ -154,6 +434,7 @@ const roleMatrix = {
 
 const ReservationTracking = () => {
   const navigate = useNavigate();
+  const [language, setLanguage] = useState('fr');
   const [companyId, setCompanyId] = useState(null);
   const [agencies, setAgencies] = useState([]);
   const [selectedAgencyId, setSelectedAgencyId] = useState('');
@@ -188,6 +469,14 @@ const ReservationTracking = () => {
   const MAX_SEATS_PER_TRIP = 30;
   const today = new Date().toISOString().split('T')[0];
 
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language][key] || key;
+    for (const param in params) {
+      text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+    }
+    return text;
+  }, [language]);
+
   // Fetch initial data
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -197,10 +486,10 @@ const ReservationTracking = () => {
         setError(null);
 
         const { data: { session }, error: sessionError } = await withTimeout(supabase.auth.getSession());
-        if (sessionError) throw new Error(`Failed to get session: ${sessionError.message}`);
+        if (sessionError) throw new Error(t('reservation_session_failed', { error: sessionError.message }));
         if (!session) {
           logError('AuthCheck', new Error('No active session'), { userId: 'unknown' });
-          toast.error('Login required');
+          toast.error(t('reservation_login_required'));
           navigate('/application/login');
           return;
         }
@@ -210,12 +499,12 @@ const ReservationTracking = () => {
           .select('user_id, role, company_id')
           .eq('user_id', session.user.id)
           .single();
-        if (userRowError) throw new Error(`Failed to fetch user: ${userRowError.message}`);
+        if (userRowError) throw new Error(t('reservation_user_failed', { error: userRowError.message }));
 
         setUserRole(userRow.role || 'Ticketing Agent');
 
         if (!roleMatrix[userRow.role]?.canViewReservations) {
-          throw new Error('You do not have permission to view reservations');
+          throw new Error(t('reservation_no_permission_view'));
         }
 
         const { data: userAgenciesData, error: userAgenciesError } = await withTimeout(
@@ -224,7 +513,7 @@ const ReservationTracking = () => {
             .select('agency_id')
             .eq('user_id', session.user.id)
         );
-        if (userAgenciesError) throw new Error(`Failed to fetch user agencies: ${userAgenciesError.message}`);
+        if (userAgenciesError) throw new Error(t('reservation_user_agencies_failed', { error: userAgenciesError.message }));
         setUserAgencies(userAgenciesData || []);
 
         let companyIdToUse = userRow.company_id;
@@ -236,9 +525,9 @@ const ReservationTracking = () => {
             .single();
           if (companyError) {
             if (companyError.code === 'PGRST116') {
-              throw new Error('No company associated with this user');
+              throw new Error(t('reservation_no_company'));
             }
-            throw new Error(`Failed to fetch company: ${companyError.message}`);
+            throw new Error(t('reservation_company_failed', { error: companyError.message }));
           }
           companyIdToUse = companyData.id;
           setCompanyId(companyIdToUse);
@@ -258,7 +547,7 @@ const ReservationTracking = () => {
         }
 
         const { data: agenciesData, error: agenciesError } = await withTimeout(agencyQuery);
-        if (agenciesError) throw new Error(`Failed to fetch agencies: ${agenciesError.message}`);
+        if (agenciesError) throw new Error(t('reservation_agencies_failed', { error: agenciesError.message }));
         setAgencies(agenciesData || []);
 
         if (agenciesData.length > 0) {
@@ -270,7 +559,7 @@ const ReservationTracking = () => {
           busQuery = busQuery.in('agency_id', userAgenciesData.map((ua) => ua.agency_id));
         }
         const { data: busesData, error: busesError } = await withTimeout(busQuery);
-        if (busesError) throw new Error(`Failed to fetch buses: ${busesError.message}`);
+        if (busesError) throw new Error(t('reservation_buses_failed', { error: busesError.message }));
         setBuses(busesData || []);
 
         let routeQuery = supabase.from('routes').select('id, company_id, origin, destination, trip_date, departure_time, arrival_time, price, bus_id, departure_agency_id, arrival_agency_id').eq('company_id', companyIdToUse);
@@ -281,7 +570,7 @@ const ReservationTracking = () => {
           );
         }
         const { data: routesData, error: routesError } = await withTimeout(routeQuery);
-        if (routesError) throw new Error(`Failed to fetch routes: ${routesError.message}`);
+        if (routesError) throw new Error(t('reservation_routes_failed', { error: routesError.message }));
         setRoutes(routesData || []);
 
         logSuccess('InitialDataFetch', 'Initial data fetched successfully', {
@@ -299,8 +588,8 @@ const ReservationTracking = () => {
         } else {
           setError(
             error.message.includes('infinite recursion') || error.message.includes('timeout')
-              ? `Database error: ${error.code || 'N/A'}`
-              : `Failed to fetch data: ${error.message}`
+              ? t('reservation_db_error', { code: error.code || 'N/A' })
+              : t('reservation_fetch_failed', { error: error.message })
           );
         }
       } finally {
@@ -310,7 +599,7 @@ const ReservationTracking = () => {
     };
 
     fetchInitialData();
-  }, [navigate, retryCount]);
+  }, [navigate, retryCount, t]);
 
   // Fetch reservations
   useEffect(() => {
@@ -368,7 +657,7 @@ const ReservationTracking = () => {
 
         const { data: reservationData, error: reservationError } = await withTimeout(reservationQuery);
         if (reservationError) {
-          throw new Error(`Failed to fetch reservations: ${reservationError.message}`);
+          throw new Error(t('reservation_reservations_failed', { error: reservationError.message }));
         }
 
         if (!reservationData || reservationData.length === 0) {
@@ -398,7 +687,7 @@ const ReservationTracking = () => {
 
           if (assignmentError) {
             logError('PassengerAssignmentsFetch', assignmentError, { reservationId: reservation.id });
-            throw new Error(`Failed to fetch passenger assignments for reservation ${reservation.id}: ${assignmentError.message}`);
+            throw new Error(t('reservation_passenger_assignments_failed', { id: reservation.id, error: assignmentError.message }));
           }
 
           const { data: profileData, error: profileError } = await supabase
@@ -500,8 +789,8 @@ const ReservationTracking = () => {
         logError('ReservationsFetch', error, { userId: session?.user?.id });
         setError(
           error.message.includes('infinite recursion') || error.message.includes('timeout')
-            ? `Database error: ${error.code || 'N/A'}`
-            : `Failed to fetch reservations: ${error.message}`
+            ? t('reservation_db_error', { code: error.code || 'N/A' })
+            : t('reservation_reservations_failed', { error: error.message })
         );
       } finally {
         setLoading(false);
@@ -510,27 +799,20 @@ const ReservationTracking = () => {
     };
 
     fetchReservations();
-  }, [companyId, userRole, selectedAgencyId, selectedRouteId]);
+  }, [companyId, userRole, selectedAgencyId, selectedRouteId, t]);
 
-  const getAvailableTimeSlots = useCallback(() => {
-    try {
-      if (!newBooking.origin || !newBooking.destination || !newBooking.departureDate) {
-        return [];
-      }
-      const matchingRoutes = routes.filter(
-        (route) =>
-          route.origin === newBooking.origin &&
-          route.destination === newBooking.destination &&
-          route.trip_date === newBooking.departureDate
-      );
-      return matchingRoutes.map((route) => route.departure_time).sort();
-    } catch (error) {
-      logError('GetAvailableTimeSlots', error);
+  const getAvailableTimeSlots = useMemo(() => {
+    if (!newBooking.origin || !newBooking.destination || !newBooking.departureDate) {
       return [];
     }
+    const matchingRoutes = routes.filter(
+      (route) =>
+        route.origin === newBooking.origin &&
+        route.destination === newBooking.destination &&
+        route.trip_date === newBooking.departureDate
+    );
+    return matchingRoutes.map((route) => route.departure_time).sort();
   }, [newBooking.origin, newBooking.destination, newBooking.departureDate, routes]);
-
-  const timeSlots = getAvailableTimeSlots();
 
   const validatePhoneNumber = useCallback((phoneNumber) => {
     try {
@@ -546,25 +828,25 @@ const ReservationTracking = () => {
     async (e) => {
       e.preventDefault();
       if (!roleMatrix[userRole]?.canCreateReservation) {
-        toast.error('You do not have permission to create reservations');
+        toast.error(t('reservation_no_permission_create'));
         return;
       }
 
       try {
         if (!newBooking.fullName.trim()) {
-          throw new Error('Full name is required');
+          throw new Error(t('reservation_full_name_required'));
         }
         if (!validatePhoneNumber(newBooking.phoneNumber)) {
-          throw new Error('Invalid phone number format (+2376xxxxxxxx)');
+          throw new Error(t('reservation_invalid_phone'));
         }
         if (!newBooking.seatNumber.match(/^[1-9][0-9]?$/)) {
-          throw new Error('Seat number must be between 1 and 99');
+          throw new Error(t('reservation_invalid_seat'));
         }
         if (!newBooking.departureDate || !newBooking.departureTime) {
-          throw new Error('Departure date and time are required');
+          throw new Error(t('reservation_departure_required'));
         }
         if (!newBooking.reservationDate || !newBooking.reservationTime) {
-          throw new Error('Reservation date and time are required');
+          throw new Error(t('reservation_reservation_required'));
         }
 
         const departureDateTime = new Date(`${newBooking.departureDate}T${newBooking.departureTime}`);
@@ -572,13 +854,13 @@ const ReservationTracking = () => {
         const now = new Date();
 
         if (departureDateTime <= now) {
-          throw new Error('Cannot book a trip in the past');
+          throw new Error(t('reservation_past_trip'));
         }
         if (reservationDateTime >= departureDateTime) {
-          throw new Error('Reservation must be before departure');
+          throw new Error(t('reservation_reservation_before_departure'));
         }
         if (reservationDateTime > now) {
-          throw new Error('Reservation cannot be in the future');
+          throw new Error(t('reservation_reservation_no_future'));
         }
 
         const tripExists = routes.find(
@@ -589,7 +871,7 @@ const ReservationTracking = () => {
             route.departure_time === newBooking.departureTime
         );
         if (!tripExists) {
-          throw new Error(`No trip exists for ${newBooking.origin} to ${newBooking.destination} on ${newBooking.departureDate} at ${newBooking.departureTime}`);
+          throw new Error(t('reservation_no_trip_exists', { origin: newBooking.origin, destination: newBooking.destination, date: newBooking.departureDate, time: newBooking.departureTime }));
         }
 
         const existingAssignments = reservations
@@ -602,7 +884,7 @@ const ReservationTracking = () => {
           .flatMap((res) => res.passengers.map((p) => p.seatNumber))
           .flat();
         if (existingAssignments.includes(parseInt(newBooking.seatNumber))) {
-          throw new Error('Seat already taken');
+          throw new Error(t('reservation_seat_taken'));
         }
 
         const totalSeatsBooked = reservations
@@ -614,7 +896,7 @@ const ReservationTracking = () => {
           )
           .reduce((sum, res) => sum + res.passengerCount, 0);
         if (totalSeatsBooked >= MAX_SEATS_PER_TRIP) {
-          throw new Error('No seats available for this trip');
+          throw new Error(t('reservation_no_seats'));
         }
 
         const { data: reservationData, error: reservationError } = await supabase
@@ -633,7 +915,7 @@ const ReservationTracking = () => {
           })
           .select('id')
           .single();
-        if (reservationError) throw new Error(`Failed to insert reservation: ${reservationError.message}`);
+        if (reservationError) throw new Error(t('reservation_insert_failed', { error: reservationError.message }));
 
         const { data: passengerData, error: passengerError } = await supabase
           .from('passenger_assignments')
@@ -652,7 +934,7 @@ const ReservationTracking = () => {
           })
           .select()
           .single();
-        if (passengerError) throw new Error(`Failed to insert passenger assignment: ${passengerError.message}`);
+        if (passengerError) throw new Error(t('reservation_passenger_insert_failed', { error: passengerError.message }));
 
         const { data: newReservationData, error: fetchError } = await supabase
           .from('reservations')
@@ -690,7 +972,7 @@ const ReservationTracking = () => {
           `)
           .eq('id', reservationData.id)
           .single();
-        if (fetchError) throw new Error(`Failed to fetch new reservation: ${fetchError.message}`);
+        if (fetchError) throw new Error(t('reservation_fetch_new_failed', { error: fetchError.message }));
 
         const newReservation = {
           id: newReservationData.id,
@@ -746,29 +1028,29 @@ const ReservationTracking = () => {
         };
 
         setReservations((prev) => [...prev, newReservation]);
-        toast.success('Booking added successfully');
+        toast.success(t('reservation_booking_added'));
       } catch (error) {
         logError('AddBooking', error);
         toast.error(
           error.message.includes('infinite recursion') || error.message.includes('timeout')
-            ? `Database error: ${error.code || 'N/A'}`
+            ? t('reservation_db_error', { code: error.code || 'N/A' })
             : error.message
         );
       } finally {
         setShowAddBookingForm(false);
       }
     },
-    [newBooking, routes, selectedAgencyId, reservations, validatePhoneNumber, companyId, buses, userRole]
+    [newBooking, routes, selectedAgencyId, reservations, validatePhoneNumber, companyId, buses, userRole, t]
   );
 
   const exportToPDF = useCallback(() => {
     if (!roleMatrix[userRole]?.canGenerateReports) {
-      toast.error('You do not have permission to export reports');
+      toast.error(t('reservation_no_permission_export'));
       return;
     }
     try {
       if (!exportOrigin || !exportDestination || !exportPeriod) {
-        toast.error('Origin, destination, and period are required for export');
+        toast.error(t('reservation_export_required'));
         return;
       }
 
@@ -781,13 +1063,13 @@ const ReservationTracking = () => {
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(14);
       doc.setTextColor(0, 0, 0);
-      doc.text('Passenger Verification Report', 14, 25);
+      doc.text(t('reservation_pdf_title'), 14, 25);
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(10);
-      doc.text(`Route: ${exportOrigin} to ${exportDestination}`, 14, 32);
-      doc.text(`Trip Date: ${exportPeriod}`, 14, 38);
-      doc.text(`Generated: ${currentDate}`, 14, 44);
-      doc.text(`Company: ${companyName}`, 14, 50);
+      doc.text(t('reservation_pdf_route', { origin: exportOrigin, destination: exportDestination }), 14, 32);
+      doc.text(t('reservation_pdf_trip_date', { period: exportPeriod }), 14, 38);
+      doc.text(t('reservation_pdf_generated', { date: currentDate }), 14, 44);
+      doc.text(t('reservation_pdf_company', { companyName }), 14, 50);
 
       // Summary
       const selectedReservations = reservations.filter(
@@ -800,10 +1082,10 @@ const ReservationTracking = () => {
       const totalPassengers = selectedReservations.reduce((sum, res) => sum + res.passengerCount, 0);
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'bold');
-      doc.text('Summary', 14, 60);
+      doc.text(t('reservation_pdf_summary'), 14, 60);
       doc.setFont('Helvetica', 'normal');
-      doc.text(`Total Reservations: ${totalReservations}`, 14, 66);
-      doc.text(`Total Passengers: ${totalPassengers}`, 14, 72);
+      doc.text(t('reservation_pdf_total_res', { count: totalReservations }), 14, 66);
+      doc.text(t('reservation_pdf_total_pass', { count: totalPassengers }), 14, 72);
 
       // Passenger Table
       const reservationTableData = selectedReservations.flatMap((reservation) =>
@@ -827,7 +1109,7 @@ const ReservationTracking = () => {
       );
 
       doc.autoTable({
-        head: [['#', 'Passenger Name', 'Departure Agency', 'Arrival Agency', 'Origin', 'Destination', 'Departure', 'Bus Type', 'Price', 'Phone Number', 'Seat Number', 'Payment Status', 'Government ID', 'Reservation Date', 'Booking Type']],
+        head: [translations[language].reservation_pdf_headers],
         body: reservationTableData,
         startY: 80,
         styles: {
@@ -880,12 +1162,12 @@ const ReservationTracking = () => {
       });
 
       doc.save(`passenger_verification_${exportOrigin}_${exportDestination}_${exportPeriod}_${new Date().toISOString()}.pdf`);
-      toast.success('PDF exported successfully');
+      toast.success(t('reservation_pdf_exported'));
     } catch (error) {
       logError('ExportToPDF', error);
-      toast.error('Failed to export PDF');
+      toast.error(t('reservation_pdf_failed'));
     }
-  }, [reservations, exportOrigin, exportDestination, exportPeriod, userRole]);
+  }, [reservations, exportOrigin, exportDestination, exportPeriod, userRole, language, t]);
 
   const renderBookingForm = () => (
     <Box
@@ -912,7 +1194,7 @@ const ReservationTracking = () => {
           title={
             <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
               <AddIcon sx={{ mr: 1 }} />
-              Add New Booking
+              {t('reservation_add_new_booking')}
             </Typography>
           }
         />
@@ -924,16 +1206,16 @@ const ReservationTracking = () => {
                 <TextField
                   select
                   fullWidth
-                  label="Origin"
+                  label={t('reservation_select_origin')}
                   value={newBooking.origin}
                   onChange={(e) =>
                     setNewBooking({ ...newBooking, origin: e.target.value, departureDate: '', departureTime: '' })
                   }
                   required
-                  helperText="Select origin"
+                  helperText={t('reservation_select_origin')}
                   variant="outlined"
                 >
-                  <MenuItem value="" disabled>Select Origin</MenuItem>
+                  <MenuItem value="" disabled>{t('reservation_select_origin')}</MenuItem>
                   {uniqueOrigins.map((origin) => (
                     <MenuItem key={origin} value={origin}>
                       {origin}
@@ -945,16 +1227,16 @@ const ReservationTracking = () => {
                 <TextField
                   select
                   fullWidth
-                  label="Destination"
+                  label={t('reservation_select_destination')}
                   value={newBooking.destination}
                   onChange={(e) =>
                     setNewBooking({ ...newBooking, destination: e.target.value, departureDate: '', departureTime: '' })
                   }
                   required
-                  helperText="Select destination"
+                  helperText={t('reservation_select_destination')}
                   variant="outlined"
                 >
-                  <MenuItem value="" disabled>Select Destination</MenuItem>
+                  <MenuItem value="" disabled>{t('reservation_select_destination')}</MenuItem>
                   {uniqueDestinations.map((destination) => (
                     <MenuItem key={destination} value={destination}>
                       {destination}
@@ -965,13 +1247,13 @@ const ReservationTracking = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Departure Date"
+                  label={t('reservation_departure_date')}
                   type="date"
                   value={newBooking.departureDate}
                   onChange={(e) => setNewBooking({ ...newBooking, departureDate: e.target.value, departureTime: '' })}
                   inputProps={{ min: today }}
                   required
-                  helperText="Select departure date"
+                  helperText={t('reservation_departure_date')}
                   variant="outlined"
                   InputLabelProps={{ shrink: true }}
                 />
@@ -980,21 +1262,21 @@ const ReservationTracking = () => {
                 <TextField
                   select
                   fullWidth
-                  label="Departure Time"
+                  label={t('reservation_departure_time')}
                   value={newBooking.departureTime}
                   onChange={(e) => setNewBooking({ ...newBooking, departureTime: e.target.value })}
                   required
-                  disabled={!newBooking.departureDate || timeSlots.length === 0}
+                  disabled={!newBooking.departureDate || getAvailableTimeSlots.length === 0}
                   helperText={
-                    newBooking.departureDate && timeSlots.length === 0
-                      ? 'No time slots available'
-                      : 'Select departure time'
+                    newBooking.departureDate && getAvailableTimeSlots.length === 0
+                      ? t('reservation_no_time_slots')
+                      : t('reservation_departure_time')
                   }
                   variant="outlined"
-                  error={newBooking.departureDate && timeSlots.length === 0}
+                  error={newBooking.departureDate && getAvailableTimeSlots.length === 0}
                 >
-                  <MenuItem value="" disabled>Select Time</MenuItem>
-                  {timeSlots.map((time) => (
+                  <MenuItem value="" disabled>{t('reservation_select_time')}</MenuItem>
+                  {getAvailableTimeSlots.map((time) => (
                     <MenuItem key={time} value={time}>
                       {time}
                     </MenuItem>
@@ -1004,36 +1286,36 @@ const ReservationTracking = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Full Name"
+                  label={t('reservation_full_name')}
                   value={newBooking.fullName}
                   onChange={(e) => setNewBooking({ ...newBooking, fullName: e.target.value })}
-                  placeholder="Enter full name"
+                  placeholder={t('reservation_enter_full_name')}
                   required
-                  helperText="Enter passenger's full name"
+                  helperText={t('reservation_passenger_full_name')}
                   variant="outlined"
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Phone Number"
+                  label={t('reservation_phone_number')}
                   value={newBooking.phoneNumber}
                   onChange={(e) => setNewBooking({ ...newBooking, phoneNumber: e.target.value })}
                   placeholder="+2376xxxxxxxx"
                   required
-                  helperText="Enter phone number (+2376xxxxxxxx)"
+                  helperText={t('reservation_enter_phone')}
                   variant="outlined"
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Seat Number"
+                  label={t('reservation_seat_number')}
                   value={newBooking.seatNumber}
                   onChange={(e) => setNewBooking({ ...newBooking, seatNumber: e.target.value })}
-                  placeholder="Enter seat number (1-99)"
+                  placeholder={t('reservation_enter_seat')}
                   required
-                  helperText="Enter seat number"
+                  helperText={t('reservation_seat_helper')}
                   variant="outlined"
                 />
               </Grid>
@@ -1041,15 +1323,15 @@ const ReservationTracking = () => {
                 <TextField
                   select
                   fullWidth
-                  label="Payment Status"
+                  label={t('reservation_payment_status')}
                   value={newBooking.paymentStatus}
                   onChange={(e) => setNewBooking({ ...newBooking, paymentStatus: e.target.value })}
                   required
-                  helperText="Select payment status"
+                  helperText={t('reservation_select_payment')}
                   variant="outlined"
                 >
-                  <MenuItem value="Paid">Paid</MenuItem>
-                  <MenuItem value="Pending">Pending</MenuItem>
+                  <MenuItem value="Paid">{t('reservation_paid')}</MenuItem>
+                  <MenuItem value="Pending">{t('reservation_pending')}</MenuItem>
                 </TextField>
               </Grid>
               <Grid item xs={12}>
@@ -1060,7 +1342,7 @@ const ReservationTracking = () => {
                       onChange={(e) => setNewBooking({ ...newBooking, identityCardVerified: e.target.checked })}
                     />
                   }
-                  label="Government ID Verified"
+                  label={t('reservation_id_verified')}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -1071,19 +1353,19 @@ const ReservationTracking = () => {
                       onChange={(e) => setNewBooking({ ...newBooking, isOnline: e.target.checked })}
                     />
                   }
-                  label="Online Booking"
+                  label={t('reservation_online_booking_label')}
                 />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Reservation Date"
+                  label={t('reservation_reservation_date_label')}
                   type="date"
                   value={newBooking.reservationDate}
                   onChange={(e) => setNewBooking({ ...newBooking, reservationDate: e.target.value })}
                   inputProps={{ max: today }}
                   required
-                  helperText="Select reservation date"
+                  helperText={t('reservation_reservation_date_label')}
                   variant="outlined"
                   InputLabelProps={{ shrink: true }}
                 />
@@ -1092,14 +1374,14 @@ const ReservationTracking = () => {
                 <TextField
                   select
                   fullWidth
-                  label="Reservation Time"
+                  label={t('reservation_reservation_time')}
                   value={newBooking.reservationTime}
                   onChange={(e) => setNewBooking({ ...newBooking, reservationTime: e.target.value })}
                   required
-                  helperText="Select reservation time"
+                  helperText={t('reservation_select_reservation_time')}
                   variant="outlined"
                 >
-                  <MenuItem value="" disabled>Select Time</MenuItem>
+                  <MenuItem value="" disabled>{t('reservation_select_time')}</MenuItem>
                   {Array.from({ length: 48 }, (_, i) => {
                     const hours = Math.floor(i / 2).toString().padStart(2, '0');
                     const minutes = (i % 2) * 30 === 0 ? '00' : '30';
@@ -1119,13 +1401,13 @@ const ReservationTracking = () => {
                   disabled={!roleMatrix[userRole]?.canCreateReservation}
                   startIcon={<CheckIcon />}
                 >
-                  Add
+                  {t('reservation_add')}
                 </Button>
                 <Button
                   variant="outlined"
                   onClick={() => setShowAddBookingForm(false)}
                 >
-                  Cancel
+                  {t('reservation_cancel')}
                 </Button>
               </Grid>
             </Grid>
@@ -1135,29 +1417,33 @@ const ReservationTracking = () => {
     </Box>
   );
 
-  const uniqueOrigins = [...new Set(routes.map((route) => route.origin).filter(Boolean))];
-  const uniqueDestinations = [...new Set(routes.map((route) => route.destination).filter(Boolean))];
-  const uniqueRoutes = routes
-    .filter((route) => route.departure_agency_id === selectedAgencyId || route.arrival_agency_id === selectedAgencyId)
-    .map((route) => ({
-      id: route.id,
-      name: `${route.origin} to ${route.destination}`,
-    }))
-    .filter((route, index, self) => 
-      index === self.findIndex((r) => r.name === route.name)
-    );
-  const uniquePeriods = [...new Set(reservations.map((reservation) => reservation.tripDate).filter(Boolean))].sort((a, b) => new Date(b) - new Date(a));
+  const uniqueOrigins = useMemo(() => [...new Set(routes.map((route) => route.origin).filter(Boolean))].sort(), [routes]);
+  const uniqueDestinations = useMemo(() => [...new Set(routes.map((route) => route.destination).filter(Boolean))].sort(), [routes]);
+  const uniqueRoutes = useMemo(() => 
+    routes
+      .filter((route) => route.departure_agency_id === selectedAgencyId || route.arrival_agency_id === selectedAgencyId)
+      .map((route) => ({
+        id: route.id,
+        name: `${route.origin} to ${route.destination}`,
+      }))
+      .filter((route, index, self) => 
+        index === self.findIndex((r) => r.name === route.name)
+      ),
+  [routes, selectedAgencyId]);
+  const uniquePeriods = useMemo(() => [...new Set(reservations.map((reservation) => reservation.tripDate).filter(Boolean))].sort((a, b) => new Date(b) - new Date(a)), [reservations]);
 
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <CircularProgress aria-label="Loading" />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Loading
-          </Typography>
-        </Box>
+        <ErrorBoundary t={t}>
+          <Box sx={{ p: 3, textAlign: 'center' }}>
+            <CircularProgress aria-label={t('reservation_loading')} />
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              {t('reservation_loading')}
+            </Typography>
+          </Box>
+        </ErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -1166,18 +1452,20 @@ const ReservationTracking = () => {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h6" color="error">
-            Error: {error}
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={() => window.location.reload()}
-            sx={{ mt: 2 }}
-          >
-            Retry
-          </Button>
-        </Box>
+        <ErrorBoundary t={t}>
+          <Box sx={{ p: 3 }}>
+            <Typography variant="h6" color="error">
+              {t('reservation_error')}: {error}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() => window.location.reload()}
+              sx={{ mt: 2 }}
+            >
+              {t('reservation_retry')}
+            </Button>
+          </Box>
+        </ErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -1186,21 +1474,22 @@ const ReservationTracking = () => {
     return (
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{ p: 3 }}>
-          <Typography variant="h6" color="error">
-            No agencies found
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            Please contact support to associate agencies with your account
-          </Typography>
-          <Button
-            variant="contained"
-            onClick={() => navigate('/dashboard')}
-            sx={{ mt: 2 }}
-          >
-            Return to Dashboard
-          </Button>
-        </Box>
+        <ErrorBoundary t={t}>
+          <Box sx={{ p: 3 }}>
+            <Breadcrumb title={t('reservation_tracking')} language={language} setLanguage={setLanguage} />
+            <Typography variant="h6" color="error">
+              {t('reservation_no_agencies')}
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              {t('reservation_contact_support')}
+            </Typography>
+            <Button
+       
+            >
+              {t('reservation_return_dashboard')}
+            </Button>
+          </Box>
+        </ErrorBoundary>
       </ThemeProvider>
     );
   }
@@ -1208,223 +1497,223 @@ const ReservationTracking = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          Reservation Tracking
-        </Typography>
-        <Card>
-          <CardHeader
-            title={
-              <Typography variant="h6">
-                Reservation Tracking - {agencies.find((a) => a.id === selectedAgencyId)?.name || 'Unknown Agency'}
-              </Typography>
-            }
-            action={
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Select
-                  value={selectedAgencyId}
-                  onChange={(e) => {
-                    setSelectedAgencyId(e.target.value);
-                    setSelectedRouteId('');
-                  }}
-                  sx={{ minWidth: 150 }}
-                >
-                  <MenuItem value="" disabled>Select Agency</MenuItem>
-                  {agencies.map((agency) => (
-                    <MenuItem key={agency.id} value={agency.id}>
-                      {agency.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <Select
-                  value={selectedRouteId}
-                  onChange={(e) => setSelectedRouteId(e.target.value)}
-                  sx={{ minWidth: 200 }}
-                >
-                  <MenuItem value="" disabled>Select Route</MenuItem>
-                  {uniqueRoutes.map((route) => (
-                    <MenuItem key={route.id} value={route.id}>
-                      {route.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setShowAddBookingForm(true)}
-                  startIcon={<AddIcon />}
-                  disabled={!roleMatrix[userRole]?.canCreateReservation}
-                >
-                  Add Booking
-                </Button>
-              </Box>
-            }
-          />
-          <Divider />
-          <CardContent>
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                Error: {error}
-              </Alert>
-            )}
-            <Grid container spacing={2} sx={{ mb: 4 }}>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Export Origin"
-                  value={exportOrigin}
-                  onChange={(e) => setExportOrigin(e.target.value)}
-                  variant="outlined"
-                  helperText="Select origin for export"
-                  InputProps={{ startAdornment: <FilterListIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
-                >
-                  <MenuItem value="" disabled>Select Origin</MenuItem>
-                  {uniqueOrigins.map((origin) => (
-                    <MenuItem key={origin} value={origin}>
-                      {origin}
-                    </MenuItem>
-                  ))}
-                </TextField>
+      <ErrorBoundary t={t}>
+        <Box sx={{ p: 3 }}>
+          <Breadcrumb title={t('reservation_tracking')} language={language} setLanguage={setLanguage} />
+          <Card>
+            <CardHeader
+              title={
+                <Typography variant="h6">
+                  {t('reservation_tracking')} - {agencies.find((a) => a.id === selectedAgencyId)?.name || 'Unknown Agency'}
+                </Typography>
+              }
+              action={
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Select
+                    value={selectedAgencyId}
+                    onChange={(e) => {
+                      setSelectedAgencyId(e.target.value);
+                      setSelectedRouteId('');
+                    }}
+                    sx={{ minWidth: 150 }}
+                  >
+                    <MenuItem value="" disabled>{t('reservation_select_agency')}</MenuItem>
+                    {agencies.map((agency) => (
+                      <MenuItem key={agency.id} value={agency.id}>
+                        {agency.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <Select
+                    value={selectedRouteId}
+                    onChange={(e) => setSelectedRouteId(e.target.value)}
+                    sx={{ minWidth: 200 }}
+                  >
+                    <MenuItem value="" disabled>{t('reservation_select_route')}</MenuItem>
+                    {uniqueRoutes.map((route) => (
+                      <MenuItem key={route.id} value={route.id}>
+                        {route.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setShowAddBookingForm(true)}
+                    startIcon={<AddIcon />}
+                    disabled={!roleMatrix[userRole]?.canCreateReservation}
+                  >
+                    {t('reservation_add_booking')}
+                  </Button>
+                </Box>
+              }
+            />
+            <Divider />
+            <CardContent>
+              {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {t('reservation_error')}: {error}
+                </Alert>
+              )}
+              <Grid container spacing={2} sx={{ mb: 4 }}>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    select
+                    fullWidth
+                    label={t('reservation_export_origin')}
+                    value={exportOrigin}
+                    onChange={(e) => setExportOrigin(e.target.value)}
+                    variant="outlined"
+                    helperText={t('reservation_select_origin_export')}
+                    InputProps={{ startAdornment: <FilterListIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
+                  >
+                    <MenuItem value="" disabled>{t('reservation_select_origin_export')}</MenuItem>
+                    {uniqueOrigins.map((origin) => (
+                      <MenuItem key={origin} value={origin}>
+                        {origin}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    select
+                    fullWidth
+                    label={t('reservation_export_destination')}
+                    value={exportDestination}
+                    onChange={(e) => setExportDestination(e.target.value)}
+                    variant="outlined"
+                    helperText={t('reservation_select_destination_export')}
+                    InputProps={{ startAdornment: <FilterListIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
+                  >
+                    <MenuItem value="" disabled>{t('reservation_select_destination_export')}</MenuItem>
+                    {uniqueDestinations.map((destination) => (
+                      <MenuItem key={destination} value={destination}>
+                        {destination}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <TextField
+                    select
+                    fullWidth
+                    label={t('reservation_export_period')}
+                    value={exportPeriod}
+                    onChange={(e) => setExportPeriod(e.target.value)}
+                    variant="outlined"
+                    helperText={t('reservation_select_period_export')}
+                    InputProps={{ startAdornment: <FilterListIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
+                  >
+                    <MenuItem value="" disabled>{t('reservation_select_period_export')}</MenuItem>
+                    {uniquePeriods.map((period) => (
+                      <MenuItem key={period} value={period}>
+                        {period}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                <Grid item xs={12}>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={exportToPDF}
+                    startIcon={<PictureAsPdfIcon />}
+                    disabled={!roleMatrix[userRole]?.canGenerateReports}
+                  >
+                    {t('reservation_export_pdf')}
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Export Destination"
-                  value={exportDestination}
-                  onChange={(e) => setExportDestination(e.target.value)}
-                  variant="outlined"
-                  helperText="Select destination for export"
-                  InputProps={{ startAdornment: <FilterListIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
-                >
-                  <MenuItem value="" disabled>Select Destination</MenuItem>
-                  {uniqueDestinations.map((destination) => (
-                    <MenuItem key={destination} value={destination}>
-                      {destination}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Export Period"
-                  value={exportPeriod}
-                  onChange={(e) => setExportPeriod(e.target.value)}
-                  variant="outlined"
-                  helperText="Select period for export"
-                  InputProps={{ startAdornment: <FilterListIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
-                >
-                  <MenuItem value="" disabled>Select Period</MenuItem>
-                  {uniquePeriods.map((period) => (
-                    <MenuItem key={period} value={period}>
-                      {period}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={exportToPDF}
-                  startIcon={<PictureAsPdfIcon />}
-                  disabled={!roleMatrix[userRole]?.canGenerateReports}
-                >
-                  Export to PDF
-                </Button>
-              </Grid>
-            </Grid>
-            <TableContainer component={Paper}>
-              <Table aria-label="Reservation Table">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
-                    <TableCell sx={{ color: 'white' }}>Departure Agency</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Arrival Agency</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Origin</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Destination</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Departure</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Arrival</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Bus Type</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Price</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Passenger Count</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Reservation Status</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Payment Status</TableCell>
-                    <TableCell sx={{ color: 'white' }}>Online Booking</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {reservations.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={12} align="center">
-                        No reservations found
-                      </TableCell>
+              <TableContainer component={Paper}>
+                <Table aria-label="Reservation Table">
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_departure_agency')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_arrival_agency')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_origin')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_destination')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_departure')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_arrival')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_bus_type')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_price')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_passenger_count')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_reservation_status')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_payment_status')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservation_online_booking')}</TableCell>
                     </TableRow>
-                  ) : (
-                    reservations.map((reservation) => (
-                      <React.Fragment key={reservation.id}>
-                        <TableRow>
-                          <TableCell>{reservation.agency}</TableCell>
-                          <TableCell>{reservation.arrivalAgency}</TableCell>
-                          <TableCell>{reservation.origin}</TableCell>
-                          <TableCell>{reservation.destination}</TableCell>
-                          <TableCell>{reservation.departureTime}</TableCell>
-                          <TableCell>{reservation.arrivalTime}</TableCell>
-                          <TableCell>{reservation.busType}</TableCell>
-                          <TableCell>{reservation.totalPrice}</TableCell>
-                          <TableCell>{reservation.passengerCount}</TableCell>
-                          <TableCell>{reservation.reservationStatus}</TableCell>
-                          <TableCell>{reservation.paymentStatus}</TableCell>
-                          <TableCell>{reservation.isOnline}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell colSpan={12} sx={{ backgroundColor: 'grey.100' }}>
-                            <Table size="small">
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>#</TableCell>
-                                  <TableCell>Full Name</TableCell>
-                                  <TableCell>Phone Number</TableCell>
-                                  <TableCell>Seat Number</TableCell>
-                                  <TableCell>Passenger Number</TableCell>
-                                  <TableCell>Payment Status</TableCell>
-                                  <TableCell>Government ID</TableCell>
-                                  <TableCell>Reservation Date</TableCell>
-                                  <TableCell>Online Booking</TableCell>
-                                  <TableCell>Passenger Assignment Created</TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {reservation.passengers.map((passenger) => (
-                                  <TableRow key={passenger.passengerIndex}>
-                                    <TableCell>{passenger.passengerIndex}</TableCell>
-                                    <TableCell>{passenger.fullName}</TableCell>
-                                    <TableCell>{passenger.phoneNumber}</TableCell>
-                                    <TableCell>{passenger.seatNumber}</TableCell>
-                                    <TableCell>{passenger.passengerNumber}</TableCell>
-                                    <TableCell>{passenger.paymentStatus}</TableCell>
-                                    <TableCell>{passenger.identityCardVerified}</TableCell>
-                                    <TableCell>{passenger.reservationDateTime}</TableCell>
-                                    <TableCell>{passenger.isOnline}</TableCell>
-                                    <TableCell>{passenger.passengerAssignmentCreatedAt}</TableCell>
+                  </TableHead>
+                  <TableBody>
+                    {reservations.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={12} align="center">
+                          {t('reservation_no_reservations')}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      reservations.map((reservation) => (
+                        <React.Fragment key={reservation.id}>
+                          <TableRow>
+                            <TableCell>{reservation.agency}</TableCell>
+                            <TableCell>{reservation.arrivalAgency}</TableCell>
+                            <TableCell>{reservation.origin}</TableCell>
+                            <TableCell>{reservation.destination}</TableCell>
+                            <TableCell>{reservation.departureTime}</TableCell>
+                            <TableCell>{reservation.arrivalTime}</TableCell>
+                            <TableCell>{reservation.busType}</TableCell>
+                            <TableCell>{reservation.totalPrice}</TableCell>
+                            <TableCell>{reservation.passengerCount}</TableCell>
+                            <TableCell>{reservation.reservationStatus}</TableCell>
+                            <TableCell>{reservation.paymentStatus}</TableCell>
+                            <TableCell>{reservation.isOnline}</TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell colSpan={12} sx={{ backgroundColor: 'grey.100' }}>
+                              <Table size="small">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>{t('reservation_passenger_index')}</TableCell>
+                                    <TableCell>{t('reservation_full_name')}</TableCell>
+                                    <TableCell>{t('reservation_phone_number')}</TableCell>
+                                    <TableCell>{t('reservation_seat_number')}</TableCell>
+                                    <TableCell>{t('reservation_passenger_number')}</TableCell>
+                                    <TableCell>{t('reservation_payment_status')}</TableCell>
+                                    <TableCell>{t('reservation_government_id')}</TableCell>
+                                    <TableCell>{t('reservation_reservation_date')}</TableCell>
+                                    <TableCell>{t('reservation_online_booking')}</TableCell>
+                                    <TableCell>{t('reservation_passenger_created')}</TableCell>
                                   </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </TableCell>
-                        </TableRow>
-                      </React.Fragment>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
-        {showAddBookingForm && renderBookingForm()}
-      </Box>
+                                </TableHead>
+                                <TableBody>
+                                  {reservation.passengers.map((passenger) => (
+                                    <TableRow key={passenger.passengerIndex}>
+                                      <TableCell>{passenger.passengerIndex}</TableCell>
+                                      <TableCell>{passenger.fullName}</TableCell>
+                                      <TableCell>{passenger.phoneNumber}</TableCell>
+                                      <TableCell>{passenger.seatNumber}</TableCell>
+                                      <TableCell>{passenger.passengerNumber}</TableCell>
+                                      <TableCell>{passenger.paymentStatus}</TableCell>
+                                      <TableCell>{passenger.identityCardVerified}</TableCell>
+                                      <TableCell>{passenger.reservationDateTime}</TableCell>
+                                      <TableCell>{passenger.isOnline}</TableCell>
+                                      <TableCell>{passenger.passengerAssignmentCreatedAt}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableCell>
+                          </TableRow>
+                        </React.Fragment>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
+          {showAddBookingForm && renderBookingForm()}
+        </Box>
+      </ErrorBoundary>
     </ThemeProvider>
   );
 };

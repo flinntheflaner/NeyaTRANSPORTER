@@ -37,6 +37,165 @@ import autoTable from 'jspdf-autotable';
 // Enterprise logo (base64 placeholder)
 const ENTERPRISE_LOGO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==';
 
+// Translations
+const translations = {
+  en: {
+    reports_pageTitle: 'Reports',
+    reservations: 'Reservations',
+    routes: 'Routes',
+    summary: 'Summary',
+    totalReservations: 'Total Reservations',
+    totalPassengers: 'Total Passengers',
+    totalRevenue: 'Total Revenue',
+    averagePrice: 'Average Price',
+    onlineBooking: 'Online Booking',
+    confirmedReservations: 'Confirmed Reservations',
+    paidRevenue: 'Paid Revenue',
+    totalRoutes: 'Total Routes',
+    averageRoutePrice: 'Average Route Price',
+    mostFrequentOrigin: 'Most Frequent Origin',
+    mostFrequentDestination: 'Most Frequent Destination',
+    vipRoutes: 'VIP Routes',
+    vvipRoutes: 'VVIP Routes',
+    standardRoutes: 'Standard Routes',
+    unknownBusTypeRoutes: 'Unknown Bus Type Routes',
+    noReservationsFound: 'No reservations found',
+    noRoutesFound: 'No routes found',
+    departureAgency: 'Departure Agency',
+    arrivalAgency: 'Arrival Agency',
+    origin: 'Origin',
+    destination: 'Destination',
+    departure: 'Departure',
+    arrival: 'Arrival',
+    busType: 'Bus Type',
+    price: 'Price',
+    passengerCount: 'Passenger Count',
+    reservationStatus: 'Reservation Status',
+    paymentStatus: 'Payment Status',
+    onlineBookingHeader: 'Online Booking',
+    passengerIndex: '#',
+    passengerName: 'Passenger Name',
+    phoneNumber: 'Phone Number',
+    seatNumber: 'Seat Number',
+    passengerNumber: 'Passenger Number',
+    governmentID: 'Government ID',
+    reservationDate: 'Reservation Date',
+    passengerAssignmentCreated: 'Passenger Assignment Created',
+    tripDate: 'Trip Date',
+    departureTime: 'Departure Time',
+    arrivalTime: 'Arrival Time',
+    weekly: 'Weekly',
+    monthly: 'Monthly',
+    sixMonthly: '6-Monthly',
+    yearly: 'Yearly',
+    selectAgency: 'Select Agency',
+    reservationsReport: 'Reservations Report',
+    routesReport: 'Routes Report',
+    period: 'Period',
+    generated: 'Generated',
+    company: 'Company',
+    agency: 'Agency',
+    pageOf: 'Page {current} of {total}',
+    noAgenciesFound: 'No agencies found',
+    contactSupport: 'Please contact support you dont have access to this page ',
+    returnToDashboard: 'Return to Dashboard',
+    noPermission: 'You do not have permission to generate reports',
+    failedToExportPDF: 'Failed to export PDF',
+    pdfExportedSuccessfully: 'PDF exported successfully',
+    error: 'Error',
+    retry: 'Retry',
+    loading: 'Loading...',
+  },
+  fr: {
+    reports_pageTitle: 'Rapports',
+    reservations: 'Réservations',
+    routes: 'Itinéraires',
+    summary: 'Résumé',
+    totalReservations: 'Total des Réservations',
+    totalPassengers: 'Total des Passagers',
+    totalRevenue: 'Revenu Total',
+    averagePrice: 'Prix Moyen',
+    onlineBooking: 'Réservation en Ligne',
+    confirmedReservations: 'Réservations Confirmées',
+    paidRevenue: 'Revenu Payé',
+    totalRoutes: 'Total des Itinéraires',
+    averageRoutePrice: 'Prix Moyen des Itinéraires',
+    mostFrequentOrigin: 'Origine la Plus Fréquente',
+    mostFrequentDestination: 'Destination la Plus Fréquente',
+    vipRoutes: 'Itinéraires VIP',
+    vvipRoutes: 'Itinéraires VVIP',
+    standardRoutes: 'Itinéraires Standard',
+    unknownBusTypeRoutes: 'Itinéraires Type de Bus Inconnu',
+    noReservationsFound: 'Aucune réservation trouvée',
+    noRoutesFound: 'Aucun itinéraire trouvé',
+    departureAgency: 'Agence de Départ',
+    arrivalAgency: 'Agence d\'Arrivée',
+    origin: 'Origine',
+    destination: 'Destination',
+    departure: 'Départ',
+    arrival: 'Arrivée',
+    busType: 'Type de Bus',
+    price: 'Prix',
+    passengerCount: 'Nombre de Passagers',
+    reservationStatus: 'Statut de Réservation',
+    paymentStatus: 'Statut de Paiement',
+    onlineBookingHeader: 'Réservation en Ligne',
+    passengerIndex: '#',
+    passengerName: 'Nom du Passager',
+    phoneNumber: 'Numéro de Téléphone',
+    seatNumber: 'Numéro de Siège',
+    passengerNumber: 'Numéro de Passager',
+    governmentID: 'ID Gouvernemental',
+    reservationDate: 'Date de Réservation',
+    passengerAssignmentCreated: 'Création d\'Assignation de Passager',
+    tripDate: 'Date du Voyage',
+    departureTime: 'Heure de Départ',
+    arrivalTime: 'Heure d\'Arrivée',
+    weekly: 'Hebdomadaire',
+    monthly: 'Mensuel',
+    sixMonthly: 'Semestriel',
+    yearly: 'Annuel',
+    selectAgency: 'Sélectionner l\'Agence',
+    reservationsReport: 'Rapport des Réservations',
+    routesReport: 'Rapport des Itinéraires',
+    period: 'Période',
+    generated: 'Généré',
+    company: 'Entreprise',
+    agency: 'Agence',
+    pageOf: 'Page {current} de {total}',
+    noAgenciesFound: 'Aucune agence trouvée',
+    contactSupport: 'Veuillez contacter le support technique ',
+    returnToDashboard: 'Retour au Tableau de Bord',
+    noPermission: 'Vous n\'avez pas la permission de générer des rapports',
+    failedToExportPDF: 'Échec de l\'export PDF',
+    pdfExportedSuccessfully: 'PDF exporté avec succès',
+    error: 'Erreur',
+    retry: 'Réessayer',
+    loading: 'Chargement...',
+  },
+};
+
+// Breadcrumb Component
+const Breadcrumb = ({ title, children, language, setLanguage }) => (
+  <Box sx={{ mb: 2, transition: 'all 0.3s ease-in-out' }}>
+    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        {title}
+      </Box>
+      <Select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        size="small"
+        sx={{ minWidth: 60 }}
+      >
+        <MenuItem value="en">EN</MenuItem>
+        <MenuItem value="fr">FR</MenuItem>
+      </Select>
+    </Typography>
+    <Box sx={{ mt: 1 }}>{children}</Box>
+  </Box>
+);
+
 // Theme setup
 const theme = createTheme({
   components: {
@@ -155,6 +314,7 @@ const roleMatrix = {
 
 const Reports = () => {
   const navigate = useNavigate();
+  const [language, setLanguage] = useState('fr');
   const [companyId, setCompanyId] = useState(null);
   const [agencies, setAgencies] = useState([]);
   const [selectedAgencyId, setSelectedAgencyId] = useState('');
@@ -168,6 +328,14 @@ const Reports = () => {
   const maxRetries = 3;
   const [reportType, setReportType] = useState('weekly');
   const [viewType, setViewType] = useState('reservations');
+
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language][key] || key;
+    for (const param in params) {
+      text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+    }
+    return text;
+  }, [language]);
 
   // Calculate date ranges for reports
   const getDateRange = useCallback(() => {
@@ -276,10 +444,10 @@ const Reports = () => {
         setError(null);
 
         const { data: { session }, error: sessionError } = await withTimeout(supabase.auth.getSession());
-        if (sessionError) throw new Error(`Failed to get session: ${sessionError.message}`);
+        if (sessionError) throw new Error(t('error', { message: `Failed to get session: ${sessionError.message}` }));
         if (!session) {
           logError('AuthCheck', new Error('No active session'), { userId: 'unknown' });
-          toast.error('Login required');
+          toast.error(t('messages_loginRequired'));
           navigate('/application/login');
           return;
         }
@@ -289,12 +457,12 @@ const Reports = () => {
           .select('user_id, role, company_id')
           .eq('user_id', session.user.id)
           .single();
-        if (userRowError) throw new Error(`Failed to fetch user: ${userRowError.message}`);
+        if (userRowError) throw new Error(t('error', { message: `Failed to fetch user: ${userRowError.message}` }));
 
         setUserRole(userRow.role || 'Ticketing Agent');
 
         if (!roleMatrix[userRow.role]?.canGenerateReports) {
-          throw new Error('You do not have permission to generate reports');
+          throw new Error(t('noPermission'));
         }
 
         const { data: userAgenciesData, error: userAgenciesError } = await withTimeout(
@@ -303,7 +471,7 @@ const Reports = () => {
             .select('agency_id')
             .eq('user_id', session.user.id)
         );
-        if (userAgenciesError) throw new Error(`Failed to fetch user agencies: ${userAgenciesError.message}`);
+        if (userAgenciesError) throw new Error(t('error', { message: `Failed to fetch user agencies: ${userAgenciesError.message}` }));
         setUserAgencies(userAgenciesData || []);
 
         let companyIdToUse = userRow.company_id;
@@ -315,9 +483,9 @@ const Reports = () => {
             .single();
           if (companyError) {
             if (companyError.code === 'PGRST116') {
-              throw new Error('No company associated with this user');
+              throw new Error(t('noCompany'));
             }
-            throw new Error(`Failed to fetch company: ${companyError.message}`);
+            throw new Error(t('error', { message: `Failed to fetch company: ${companyError.message}` }));
           }
           companyIdToUse = companyData.id;
           setCompanyId(companyIdToUse);
@@ -337,7 +505,7 @@ const Reports = () => {
         }
 
         const { data: agenciesData, error: agenciesError } = await withTimeout(agencyQuery);
-        if (agenciesError) throw new Error(`Failed to fetch agencies: ${agenciesError.message}`);
+        if (agenciesError) throw new Error(t('error', { message: `Failed to fetch agencies: ${agenciesError.message}` }));
         setAgencies(agenciesData || []);
 
         if (agenciesData.length > 0) {
@@ -357,8 +525,8 @@ const Reports = () => {
         } else {
           setError(
             error.message.includes('infinite recursion') || error.message.includes('timeout')
-              ? `Database error: ${error.code || 'N/A'}`
-              : `Failed to fetch data: ${error.message}`
+              ? t('dbError', { code: error.code || 'N/A' })
+              : t('fetchError', { message: error.message })
           );
         }
       } finally {
@@ -368,7 +536,7 @@ const Reports = () => {
     };
 
     fetchInitialData();
-  }, [navigate, retryCount]);
+  }, [navigate, retryCount, t]);
 
   // Fetch reservations and routes
   useEffect(() => {
@@ -433,7 +601,7 @@ const Reports = () => {
 
         const { data: reservationData, error: reservationError } = await withTimeout(reservationQuery);
         if (reservationError) {
-          throw new Error(`Failed to fetch reservations: ${reservationError.message}`);
+          throw new Error(t('error', { message: `Failed to fetch reservations: ${reservationError.message}` }));
         }
 
         let routeQuery = supabase
@@ -467,7 +635,7 @@ const Reports = () => {
 
         const { data: routesData, error: routesError } = await withTimeout(routeQuery);
         if (routesError) {
-          throw new Error(`Failed to fetch routes: ${routesError.message}`);
+          throw new Error(t('error', { message: `Failed to fetch routes: ${routesError.message}` }));
         }
 
         const reservationPromises = (reservationData || []).map(async (reservation) => {
@@ -492,7 +660,7 @@ const Reports = () => {
 
           if (assignmentError) {
             logError('PassengerAssignmentsFetch', assignmentError, { reservationId: reservation.id });
-            throw new Error(`Failed to fetch passenger assignments for reservation ${reservation.id}: ${assignmentError.message}`);
+            throw new Error(t('error', { message: `Failed to fetch passenger assignments for reservation ${reservation.id}: ${assignmentError.message}` }));
           }
 
           const { data: profileData, error: profileError } = await supabase
@@ -615,8 +783,8 @@ const Reports = () => {
         logError('DataFetch', error, { userId: session?.user?.id });
         setError(
           error.message.includes('infinite recursion') || error.message.includes('timeout')
-            ? `Database error: ${error.code || 'N/A'}`
-            : `Failed to fetch data: ${error.message}`
+            ? t('dbError', { code: error.code || 'N/A' })
+            : t('fetchError', { message: error.message })
         );
       } finally {
         setLoading(false);
@@ -625,11 +793,11 @@ const Reports = () => {
     };
 
     fetchData();
-  }, [companyId, userRole, selectedAgencyId, reportType, userAgencies, getDateRange]);
+  }, [companyId, userRole, selectedAgencyId, reportType, userAgencies, getDateRange, t]);
 
   const exportToPDF = useCallback(() => {
     if (!roleMatrix[userRole]?.canGenerateReports) {
-      toast.error('You do not have permission to export reports');
+      toast.error(t('noPermission'));
       return;
     }
     try {
@@ -637,59 +805,52 @@ const Reports = () => {
       const companyName = reservations[0]?.companyName || 'Unknown Company';
       const currentDate = new Date().toLocaleString();
       const { start, end } = getDateRange();
-      const periodLabel = reportType.charAt(0).toUpperCase() + reportType.slice(1);
+      const periodLabel = t(reportType);
 
       // Header
       doc.addImage(ENTERPRISE_LOGO, 'PNG', 14, 10, 30, 10);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(14);
       doc.setTextColor(0, 0, 0);
-      doc.text(`${periodLabel} ${viewType === 'reservations' ? 'Reservations' : 'Routes'} Report`, 14, 25);
+      doc.text(`${periodLabel} ${viewType === 'reservations' ? t('reservationsReport') : t('routesReport')}`, 14, 25);
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(10);
-      doc.text(`Period: ${start.toLocaleDateString()} to ${end.toLocaleDateString()}`, 14, 32);
-      doc.text(`Generated: ${currentDate}`, 14, 38);
-      doc.text(`Company: ${companyName}`, 14, 44);
-      doc.text(`Agency: ${agencies.find((a) => a.id === selectedAgencyId)?.name || 'Unknown Agency'}`, 14, 50);
+      doc.text(`${t('period')}: ${start.toLocaleDateString()} to ${end.toLocaleDateString()}`, 14, 32);
+      doc.text(`${t('generated')}: ${currentDate}`, 14, 38);
+      doc.text(`${t('company')}: ${companyName}`, 14, 44);
+      doc.text(`${t('agency')}: ${agencies.find((a) => a.id === selectedAgencyId)?.name || 'Unknown Agency'}`, 14, 50);
 
       // Summary
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'bold');
-      doc.text('Summary', 14, 60);
+      doc.text(t('summary'), 14, 60);
       doc.setFont('Helvetica', 'normal');
       let yPos = 66;
       if (viewType === 'reservations') {
-        doc.text(`Total Reservations: ${metrics.totalReservations}`, 14, yPos);
-        doc.text(`Total Passengers: ${metrics.totalPassengers}`, 14, yPos + 6);
-        doc.text(`Total Revenue: ${metrics.totalRevenue}`, 14, yPos + 12);
-        doc.text(`Average Price: ${metrics.averagePrice}`, 14, yPos + 18);
-        doc.text(`Online Booking: ${metrics.onlineBookingPercentage}%`, 14, yPos + 24);
-        doc.text(`Reservations by Status:`, 14, yPos + 30);
-        doc.text(`  Pending: ${metrics.reservationsByStatus.Pending}`, 14, yPos + 36);
-        doc.text(`  Confirmed: ${metrics.reservationsByStatus.Confirmed}`, 14, yPos + 42);
-        doc.text(`  Cancelled: ${metrics.reservationsByStatus.Cancelled}`, 14, yPos + 48);
-        doc.text(`Revenue by Payment Status:`, 14, yPos + 54);
-        doc.text(`  Paid: ${metrics.revenueByPaymentStatus.Paid.toFixed(2)}`, 14, yPos + 60);
-        doc.text(`  Pending: ${metrics.revenueByPaymentStatus.Pending.toFixed(2)}`, 14, yPos + 66);
-        doc.text(`  Failed: ${metrics.revenueByPaymentStatus.Failed.toFixed(2)}`, 14, yPos + 72);
-        yPos += 78;
+        doc.text(`${t('totalReservations')}: ${metrics.totalReservations}`, 14, yPos);
+        doc.text(`${t('totalPassengers')}: ${metrics.totalPassengers}`, 14, yPos + 6);
+        doc.text(`${t('totalRevenue')}: ${metrics.totalRevenue} XAF`, 14, yPos + 12);
+        doc.text(`${t('averagePrice')}: ${metrics.averagePrice} XAF`, 14, yPos + 18);
+        doc.text(`${t('onlineBooking')}: ${metrics.onlineBookingPercentage}%`, 14, yPos + 24);
+        doc.text(`${t('confirmedReservations')}: ${metrics.reservationsByStatus.Confirmed}`, 14, yPos + 30);
+        doc.text(`${t('paidRevenue')}: ${metrics.revenueByPaymentStatus.Paid.toFixed(2)} XAF`, 14, yPos + 36);
+        yPos += 42;
       } else {
-        doc.text(`Total Routes: ${metrics.totalRoutes}`, 14, yPos);
-        doc.text(`Average Route Price: ${metrics.averageRoutePrice}`, 14, yPos + 6);
-        doc.text(`Most Frequent Origin: ${metrics.mostFrequentOrigin.origin} (${metrics.mostFrequentOrigin.count})`, 14, yPos + 12);
-        doc.text(`Most Frequent Destination: ${metrics.mostFrequentDestination.destination} (${metrics.mostFrequentDestination.count})`, 14, yPos + 18);
-        doc.text(`Routes by Bus Type:`, 14, yPos + 24);
-        doc.text(`  VIP: ${metrics.routesByBusType.VIP}`, 14, yPos + 30);
-        doc.text(`  VVIP: ${metrics.routesByBusType.VVIP}`, 14, yPos + 36);
-        doc.text(`  Standard: ${metrics.routesByBusType.Standard}`, 14, yPos + 42);
-        doc.text(`  Unknown: ${metrics.routesByBusType.Unknown}`, 14, yPos + 48);
-        yPos += 54;
+        doc.text(`${t('totalRoutes')}: ${metrics.totalRoutes}`, 14, yPos);
+        doc.text(`${t('averageRoutePrice')}: ${metrics.averageRoutePrice} XAF`, 14, yPos + 6);
+        doc.text(`${t('mostFrequentOrigin')}: ${metrics.mostFrequentOrigin.origin} (${metrics.mostFrequentOrigin.count})`, 14, yPos + 12);
+        doc.text(`${t('mostFrequentDestination')}: ${metrics.mostFrequentDestination.destination} (${metrics.mostFrequentDestination.count})`, 14, yPos + 18);
+        doc.text(`${t('vipRoutes')}: ${metrics.routesByBusType.VIP}`, 14, yPos + 24);
+        doc.text(`${t('vvipRoutes')}: ${metrics.routesByBusType.VVIP}`, 14, yPos + 30);
+        doc.text(`${t('standardRoutes')}: ${metrics.routesByBusType.Standard}`, 14, yPos + 36);
+        doc.text(`${t('unknownBusTypeRoutes')}: ${metrics.routesByBusType.Unknown}`, 14, yPos + 42);
+        yPos += 48;
       }
 
       // Data Table
       doc.setFontSize(10);
       doc.setFont('Helvetica', 'bold');
-      doc.text(viewType === 'reservations' ? 'Reservations' : 'Routes', 14, yPos);
+      doc.text(viewType === 'reservations' ? t('reservations') : t('routes'), 14, yPos);
       if (viewType === 'reservations') {
         const reservationTableData = reservations.flatMap((reservation) =>
           reservation.passengers.map((passenger) => [
@@ -701,7 +862,7 @@ const Reports = () => {
             reservation.destination,
             reservation.departureTime,
             reservation.busType,
-            reservation.totalPrice,
+            `${reservation.totalPrice} XAF`,
             passenger.phoneNumber,
             passenger.seatNumber,
             passenger.paymentStatus,
@@ -711,8 +872,8 @@ const Reports = () => {
           ])
         );
 
-        doc.autoTable({
-          head: [['#', 'Passenger Name', 'Departure Agency', 'Arrival Agency', 'Origin', 'Destination', 'Departure', 'Bus Type', 'Price', 'Phone Number', 'Seat Number', 'Payment Status', 'Government ID', 'Reservation Date', 'Booking Type']],
+        autoTable(doc, {
+          head: [[t('passengerIndex'), t('passengerName'), t('departureAgency'), t('arrivalAgency'), t('origin'), t('destination'), t('departure'), t('busType'), t('price'), t('phoneNumber'), t('seatNumber'), t('paymentStatus'), t('governmentID'), t('reservationDate'), t('onlineBookingHeader')]],
           body: reservationTableData,
           startY: yPos + 6,
           styles: {
@@ -765,11 +926,11 @@ const Reports = () => {
           route.departureTime,
           route.arrivalTime,
           route.busType,
-          route.price,
+          `${route.price} XAF`,
         ]);
 
-        doc.autoTable({
-          head: [['Origin', 'Destination', 'Departure Agency', 'Arrival Agency', 'Trip Date', 'Departure Time', 'Arrival Time', 'Bus Type', 'Price']],
+        autoTable(doc, {
+          head: [[t('origin'), t('destination'), t('departureAgency'), t('arrivalAgency'), t('tripDate'), t('departureTime'), t('arrivalTime'), t('busType'), t('price')]],
           body: routeTableData,
           startY: yPos + 6,
           styles: {
@@ -814,17 +975,17 @@ const Reports = () => {
       const pageCount = doc.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        doc.text(`Page ${i} of ${pageCount}`, 14, doc.internal.pageSize.height - 10);
+        doc.text(t('pageOf', { current: i, total: pageCount }), 14, doc.internal.pageSize.height - 10);
         doc.text(companyName, doc.internal.pageSize.width - 14 - doc.getTextWidth(companyName), doc.internal.pageSize.height - 10);
       }
 
       doc.save(`${reportType}_${viewType}_report_${selectedAgencyId}_${new Date().toISOString()}.pdf`);
-      toast.success('PDF exported successfully');
+      toast.success(t('pdfExportedSuccessfully'));
     } catch (error) {
       logError('ExportToPDF', error);
-      toast.error('Failed to export PDF');
+      toast.error(t('failedToExportPDF'));
     }
-  }, [reservations, routes, selectedAgencyId, reportType, userRole, agencies, viewType, metrics, getDateRange]);
+  }, [reservations, routes, selectedAgencyId, reportType, userRole, agencies, viewType, metrics, getDateRange, t]);
 
   if (loading) {
     return (
@@ -849,14 +1010,14 @@ const Reports = () => {
         <CssBaseline />
         <Box sx={{ p: 3 }}>
           <Typography variant="h6" color="error">
-            Error: {error}
+            {t('error')}: {error}
           </Typography>
           <Button
             variant="contained"
             onClick={() => window.location.reload()}
             sx={{ mt: 2 }}
           >
-            Retry
+            {t('retry')}
           </Button>
         </Box>
       </ThemeProvider>
@@ -868,19 +1029,11 @@ const Reports = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Box sx={{ p: 3 }}>
-          <Typography variant="h6" color="error">
-            No agencies found
-          </Typography>
+       
           <Typography variant="body2" sx={{ mt: 1 }}>
-            Please contact support to associate agencies with your account
+            {t('contactSupport')}
           </Typography>
-          <Button
-            variant="contained"
-            onClick={() => navigate('/dashboard')}
-            sx={{ mt: 2 }}
-          >
-            Return to Dashboard
-          </Button>
+        
         </Box>
       </ThemeProvider>
     );
@@ -892,14 +1045,13 @@ const Reports = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ p: 3 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>
-          Reports
-        </Typography>
+        <Breadcrumb title={t('reports_pageTitle')} language={language} setLanguage={setLanguage}>
+        </Breadcrumb>
         <Card>
           <CardHeader
             title={
               <Typography variant="h6">
-                {viewType === 'reservations' ? 'Reservations' : 'Routes'} Report - {agencies.find((a) => a.id === selectedAgencyId)?.name || 'Unknown Agency'}
+                {viewType === 'reservations' ? t('reservations') : t('routes')} {t('reports_pageTitle')} - {agencies.find((a) => a.id === selectedAgencyId)?.name || 'Unknown Agency'}
               </Typography>
             }
             action={
@@ -909,7 +1061,7 @@ const Reports = () => {
                   onChange={(e) => setSelectedAgencyId(e.target.value)}
                   sx={{ minWidth: 150 }}
                 >
-                  <MenuItem value="" disabled>Select Agency</MenuItem>
+                  <MenuItem value="" disabled>{t('selectAgency')}</MenuItem>
                   {agencies.map((agency) => (
                     <MenuItem key={agency.id} value={agency.id}>
                       {agency.name}
@@ -921,10 +1073,10 @@ const Reports = () => {
                   onChange={(e) => setReportType(e.target.value)}
                   sx={{ minWidth: 150 }}
                 >
-                  <MenuItem value="weekly">Weekly</MenuItem>
-                  <MenuItem value="monthly">Monthly</MenuItem>
-                  <MenuItem value="sixMonthly">6-Monthly</MenuItem>
-                  <MenuItem value="yearly">Yearly</MenuItem>
+                  <MenuItem value="weekly">{t('weekly')}</MenuItem>
+                  <MenuItem value="monthly">{t('monthly')}</MenuItem>
+                  <MenuItem value="sixMonthly">{t('sixMonthly')}</MenuItem>
+                  <MenuItem value="yearly">{t('yearly')}</MenuItem>
                 </Select>
                 <RadioGroup
                   row
@@ -932,8 +1084,8 @@ const Reports = () => {
                   onChange={(e) => setViewType(e.target.value)}
                   sx={{ ml: 2 }}
                 >
-                  <FormControlLabel value="reservations" control={<Radio />} label="Reservations" />
-                  <FormControlLabel value="routes" control={<Radio />} label="Routes" />
+                  <FormControlLabel value="reservations" control={<Radio />} label={t('reservations')} />
+                  <FormControlLabel value="routes" control={<Radio />} label={t('routes')} />
                 </RadioGroup>
                 <Button
                   variant="contained"
@@ -942,7 +1094,7 @@ const Reports = () => {
                   startIcon={<PictureAsPdfIcon />}
                   disabled={!roleMatrix[userRole]?.canGenerateReports}
                 >
-                  Export to PDF
+                  {t('exportToPDF')}
                 </Button>
               </Box>
             }
@@ -951,108 +1103,96 @@ const Reports = () => {
           <CardContent>
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                Error: {error}
+                {t('error')}: {error}
               </Alert>
             )}
             <Typography variant="h6" sx={{ mb: 2 }}>
-              {reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report ({start.toLocaleDateString()} - {end.toLocaleDateString()})
+              {t(reportType)} {t('reports_pageTitle')} ({start.toLocaleDateString()} - {end.toLocaleDateString()})
             </Typography>
             <Typography variant="subtitle1" sx={{ mb: 2 }}>
-              Summary
+              {t('summary')}
             </Typography>
             <Grid container spacing={2} sx={{ mb: 4 }}>
               {viewType === 'reservations' ? (
                 <>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Total Reservations: {metrics.totalReservations}</Typography>
+                    <Typography>{t('totalReservations')}: {metrics.totalReservations}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Total Passengers: {metrics.totalPassengers}</Typography>
+                    <Typography>{t('totalPassengers')}: {metrics.totalPassengers}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Total Revenue: {metrics.totalRevenue}</Typography>
+                    <Typography>{t('totalRevenue')}: {metrics.totalRevenue} XAF</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Average Price: {metrics.averagePrice}</Typography>
+                    <Typography>{t('averagePrice')}: {metrics.averagePrice} XAF</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Online Booking: {metrics.onlineBookingPercentage}%</Typography>
+                    <Typography>{t('onlineBooking')}: {metrics.onlineBookingPercentage}%</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Pending Reservations: {metrics.reservationsByStatus.Pending}</Typography>
+                    <Typography>{t('confirmedReservations')}: {metrics.reservationsByStatus.Confirmed}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Confirmed Reservations: {metrics.reservationsByStatus.Confirmed}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Typography>Cancelled Reservations: {metrics.reservationsByStatus.Cancelled}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Typography>Paid Revenue: {metrics.revenueByPaymentStatus.Paid.toFixed(2)}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Typography>Pending Revenue: {metrics.revenueByPaymentStatus.Pending.toFixed(2)}</Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={3}>
-                    <Typography>Failed Revenue: {metrics.revenueByPaymentStatus.Failed.toFixed(2)}</Typography>
+                    <Typography>{t('paidRevenue')}: {metrics.revenueByPaymentStatus.Paid.toFixed(2)} XAF</Typography>
                   </Grid>
                 </>
               ) : (
                 <>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Total Routes: {metrics.totalRoutes}</Typography>
+                    <Typography>{t('totalRoutes')}: {metrics.totalRoutes}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Average Route Price: {metrics.averageRoutePrice}</Typography>
+                    <Typography>{t('averageRoutePrice')}: {metrics.averageRoutePrice} XAF</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Most Frequent Origin: {metrics.mostFrequentOrigin.origin} ({metrics.mostFrequentOrigin.count})</Typography>
+                    <Typography>{t('mostFrequentOrigin')}: {metrics.mostFrequentOrigin.origin} ({metrics.mostFrequentOrigin.count})</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Most Frequent Destination: {metrics.mostFrequentDestination.destination} ({metrics.mostFrequentDestination.count})</Typography>
+                    <Typography>{t('mostFrequentDestination')}: {metrics.mostFrequentDestination.destination} ({metrics.mostFrequentDestination.count})</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>VIP Routes: {metrics.routesByBusType.VIP}</Typography>
+                    <Typography>{t('vipRoutes')}: {metrics.routesByBusType.VIP}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>VVIP Routes: {metrics.routesByBusType.VVIP}</Typography>
+                    <Typography>{t('vvipRoutes')}: {metrics.routesByBusType.VVIP}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Standard Routes: {metrics.routesByBusType.Standard}</Typography>
+                    <Typography>{t('standardRoutes')}: {metrics.routesByBusType.Standard}</Typography>
                   </Grid>
                   <Grid item xs={12} sm={3}>
-                    <Typography>Unknown Bus Type Routes: {metrics.routesByBusType.Unknown}</Typography>
+                    <Typography>{t('unknownBusTypeRoutes')}: {metrics.routesByBusType.Unknown}</Typography>
                   </Grid>
                 </>
               )}
             </Grid>
             <Typography variant="subtitle1" sx={{ mb: 2 }}>
-              {viewType === 'reservations' ? 'Reservations' : 'Routes'}
+              {viewType === 'reservations' ? t('reservations') : t('routes')}
             </Typography>
             <TableContainer component={Paper}>
               {viewType === 'reservations' ? (
                 <Table aria-label="Reservations Table">
                   <TableHead>
                     <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
-                      <TableCell sx={{ color: 'white' }}>Departure Agency</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Arrival Agency</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Origin</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Destination</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Departure</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Arrival</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Bus Type</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Price</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Passenger Count</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Reservation Status</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Payment Status</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Online Booking</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('departureAgency')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('arrivalAgency')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('origin')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('destination')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('departure')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('arrival')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('busType')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('price')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('passengerCount')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('reservationStatus')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('paymentStatus')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('onlineBookingHeader')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {reservations.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={12} align="center">
-                          No reservations found
+                          {t('noReservationsFound')}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -1066,7 +1206,7 @@ const Reports = () => {
                             <TableCell>{reservation.departureTime}</TableCell>
                             <TableCell>{reservation.arrivalTime}</TableCell>
                             <TableCell>{reservation.busType}</TableCell>
-                            <TableCell>{reservation.totalPrice}</TableCell>
+                            <TableCell>{reservation.totalPrice} XAF</TableCell>
                             <TableCell>{reservation.passengerCount}</TableCell>
                             <TableCell>{reservation.reservationStatus}</TableCell>
                             <TableCell>{reservation.paymentStatus}</TableCell>
@@ -1077,16 +1217,16 @@ const Reports = () => {
                               <Table size="small">
                                 <TableHead>
                                   <TableRow>
-                                    <TableCell>#</TableCell>
-                                    <TableCell>Passenger Name</TableCell>
-                                    <TableCell>Phone Number</TableCell>
-                                    <TableCell>Seat Number</TableCell>
-                                    <TableCell>Passenger Number</TableCell>
-                                    <TableCell>Payment Status</TableCell>
-                                    <TableCell>Government ID</TableCell>
-                                    <TableCell>Reservation Date</TableCell>
-                                    <TableCell>Online Booking</TableCell>
-                                    <TableCell>Passenger Assignment Created</TableCell>
+                                    <TableCell>{t('passengerIndex')}</TableCell>
+                                    <TableCell>{t('passengerName')}</TableCell>
+                                    <TableCell>{t('phoneNumber')}</TableCell>
+                                    <TableCell>{t('seatNumber')}</TableCell>
+                                    <TableCell>{t('passengerNumber')}</TableCell>
+                                    <TableCell>{t('paymentStatus')}</TableCell>
+                                    <TableCell>{t('governmentID')}</TableCell>
+                                    <TableCell>{t('reservationDate')}</TableCell>
+                                    <TableCell>{t('onlineBookingHeader')}</TableCell>
+                                    <TableCell>{t('passengerAssignmentCreated')}</TableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -1117,22 +1257,22 @@ const Reports = () => {
                 <Table aria-label="Routes Table">
                   <TableHead>
                     <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
-                      <TableCell sx={{ color: 'white' }}>Origin</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Destination</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Departure Agency</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Arrival Agency</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Trip Date</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Departure Time</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Arrival Time</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Bus Type</TableCell>
-                      <TableCell sx={{ color: 'white' }}>Price</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('origin')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('destination')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('departureAgency')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('arrivalAgency')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('tripDate')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('departureTime')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('arrivalTime')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('busType')}</TableCell>
+                      <TableCell sx={{ color: 'white' }}>{t('price')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {routes.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={9} align="center">
-                          No routes found
+                          {t('noRoutesFound')}
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -1146,7 +1286,7 @@ const Reports = () => {
                           <TableCell>{route.departureTime}</TableCell>
                           <TableCell>{route.arrivalTime}</TableCell>
                           <TableCell>{route.busType}</TableCell>
-                          <TableCell>{route.price}</TableCell>
+                          <TableCell>{route.price} XAF</TableCell>
                         </TableRow>
                       ))
                     )}

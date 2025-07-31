@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, supabaseAdmin } from './supabase';
 import {
@@ -50,14 +50,215 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { isValidPhoneNumber } from 'react-phone-number-input';
-import { useTranslation } from './LanguageContext';
+
+// Translations
+const translations = {
+  en: {
+    agent_error: 'Error',
+    agent_unknownError: 'Unknown error: {error}',
+    agent_errorDetails: 'Details: {details}',
+    agent_noDetails: 'No details available',
+    agent_refreshOrContact: 'Please refresh the page or contact support.',
+    agent_sessionError: 'Session error: {error}',
+    agent_loginRequired: 'Please login to continue.',
+    agent_userFetchError: 'Failed to fetch user data: {error}',
+    agent_noUserData: 'No user data found. Defaulting to Ticketing Agent role.',
+    agent_noPermission: 'You do not have permission to access this page.',
+    agent_noCompany: 'No associated company found.',
+    agent_companyFetchError: 'Failed to fetch company data: {error}',
+    agent_agencyFetchError: 'Failed to fetch agencies: {error}',
+    agent_agencyValidationError: 'Failed to validate agencies: {error}',
+    agent_dbError: 'Database error (code: {code}). Please try again later.',
+    agent_fetchError: 'Failed to fetch data: {error}',
+    agent_usersFetchError: 'Failed to fetch users: {error}',
+    agent_noPermissionCreate: 'You do not have permission to create agents.',
+    agent_requiredFields: 'All fields are required.',
+    agent_invalidEmail: 'Invalid email format.',
+    agent_invalidPhone: 'Invalid phone number.',
+    agent_invalidPassword: 'Password must be at least 8 characters, include uppercase, lowercase, number, and special character.',
+    agent_invalidRole: 'Invalid role selected.',
+    agent_invalidAgencies: 'Invalid agencies selected.',
+    agent_unauthorizedAgencies: 'You are not authorized to assign these agencies.',
+    agent_supabaseAdminNotInitialized: 'Supabase admin client not initialized.',
+    agent_createUserError: 'Failed to create user: {error}',
+    agent_assignAgenciesError: 'Failed to assign agencies: {error}',
+    agent_selfAssignAgenciesError: 'Cannot assign agencies to yourself.',
+    agent_addedSuccess: 'Agent added successfully.',
+    agent_insufficientPermissions: 'Insufficient permissions: {error}',
+    agent_addError: 'Failed to add agent: {error}',
+    agent_noPermissionUpdate: 'You do not have permission to update agents.',
+    agent_supervisorEditRestriction: 'Agent Supervisors can only edit Ticketing Agents.',
+    agent_selfRoleChangeError: 'Cannot change your own role.',
+    agent_updateUserError: 'Failed to update user: {error}',
+    agent_updateAgenciesError: 'Failed to update agencies: {error}',
+    agent_passwordUpdateSkipped: 'Password update skipped due to initialization issue.',
+    agent_passwordUpdateError: 'Failed to update password: {error}',
+    agent_updatedSuccess: 'Agent updated successfully.',
+    agent_updateError: 'Failed to update agent: {error}',
+    agent_noPermissionDelete: 'You do not have permission to delete agents.',
+    agent_selfDeleteError: 'Cannot delete your own account.',
+    agent_confirmDelete: 'Are you sure you want to delete this agent?',
+    agent_deleteAgenciesError: 'Failed to delete agency assignments: {error}',
+    agent_deleteUserError: 'Failed to delete user record: {error}',
+    agent_deleteAuthError: 'Failed to delete auth user: {error}',
+    agent_deletedSuccess: 'Agent deleted successfully.',
+    agent_deleteError: 'Failed to delete agent: {error}',
+    agent_editTitle: 'Edit Agent: {name}',
+    agent_addTitle: 'Add New Agent',
+    agent_update: 'Update',
+    agent_add: 'Add',
+    agent_yourProfile: 'Your Profile',
+    agent_name: 'Name',
+    agent_namePlaceholder: 'Enter name',
+    agent_email: 'Email',
+    agent_emailPlaceholder: 'Enter email',
+    agent_phonePlaceholder: 'Enter phone number',
+    agent_newPasswordOptional: 'New Password (Optional)',
+    agent_password: 'Password',
+    agent_passwordPlaceholder: 'Enter password',
+    agent_togglePasswordVisibility: 'Toggle password visibility',
+    agent_role: 'Role',
+    agent_selfRoleLocked: 'Cannot change your own role.',
+    agent_selectRole: 'Select Role',
+    agent_agenciesOptional: 'Agencies (Optional)',
+    agent_selectAgencies: 'Select Agencies',
+    agent_selfAgenciesLocked: 'Cannot change your own agencies.',
+    agent_noAgenciesAvailable: 'No agencies available.',
+    agent_selectAgenciesHelper: 'Select one or more agencies.',
+    agent_cancel: 'Cancel',
+    loading: 'Loading...',
+    retry: 'Retry',
+    agent_contactSupport: 'If the problem persists, contact support.',
+    agent_pageTitle: 'Agent Management',
+    agent_listTitle: 'Agents List',
+    agent_temporaryRole: 'Temporary Role (Expires: {date})',
+    agent_addAgent: 'Add Agent',
+    agent_noAgents: 'No agents found. {action}',
+    agent_addAction: 'Add one above.',
+    agent_contactAdminAction: 'Contact your administrator.',
+    agent_table: 'Agents Table',
+    agent_agencies: 'Agencies',
+    agent_phone: 'Phone',
+    agent_actions: 'Actions',
+    agent_noAgencies: 'No Agencies',
+    agent_you: 'You',
+    agent_currentUser: 'Current User',
+    agent_edit: 'Edit',
+    agent_delete: 'Delete',
+    agent_profile: 'Profile of {name}',
+  },
+  fr: {
+    agent_error: 'Erreur',
+    agent_unknownError: 'Erreur inconnue : {error}',
+    agent_errorDetails: 'Détails : {details}',
+    agent_noDetails: 'Aucun détail disponible',
+    agent_refreshOrContact: 'Veuillez rafraîchir la page ou contacter le support.',
+    agent_sessionError: 'Erreur de session : {error}',
+    agent_loginRequired: 'Veuillez vous connecter pour continuer.',
+    agent_userFetchError: 'Échec de la récupération des données utilisateur : {error}',
+    agent_noUserData: 'Aucune donnée utilisateur trouvée. Rôle par défaut : Agent de Billetterie.',
+    agent_noPermission: "Vous n'avez pas la permission d'accéder à cette page.",
+    agent_noCompany: 'Aucune entreprise associée trouvée.',
+    agent_companyFetchError: 'Échec de la récupération des données de l\'entreprise : {error}',
+    agent_agencyFetchError: 'Échec de la récupération des agences : {error}',
+    agent_dbError: 'Erreur de base de données (code : {code}). Veuillez réessayer plus tard.',
+    agent_fetchError: 'Échec de la récupération des données : {error}',
+    agent_usersFetchError: 'Échec de la récupération des utilisateurs : {error}',
+    agent_noPermissionCreate: "Vous n'avez pas la permission de créer des agents.",
+    agent_requiredFields: 'Tous les champs sont requis.',
+    agent_invalidEmail: 'Format d\'email invalide.',
+    agent_invalidPhone: 'Numéro de téléphone invalide.',
+    agent_invalidPassword: 'Le mot de passe doit contenir au moins 8 caractères, inclure majuscule, minuscule, chiffre et caractère spécial.',
+    agent_invalidRole: 'Rôle sélectionné invalide.',
+    agent_invalidAgencies: 'Agences sélectionnées invalides.',
+    agent_unauthorizedAgencies: "Vous n'êtes pas autorisé à assigner ces agences.",
+    agent_supabaseAdminNotInitialized: 'Client admin Supabase non initialisé.',
+    agent_createUserError: 'Échec de la création de l\'utilisateur : {error}',
+    agent_assignAgenciesError: 'Échec de l\'assignation des agences : {error}',
+    agent_selfAssignAgenciesError: 'Impossible d\'assigner des agences à vous-même.',
+    agent_addedSuccess: 'Agent ajouté avec succès.',
+    agent_insufficientPermissions: 'Permissions insuffisantes : {error}',
+    agent_addError: 'Échec de l\'ajout de l\'agent : {error}',
+    agent_noPermissionUpdate: "Vous n'avez pas la permission de mettre à jour des agents.",
+    agent_supervisorEditRestriction: 'Les Superviseurs d\'Agents ne peuvent éditer que les Agents de Billetterie.',
+    agent_selfRoleChangeError: 'Impossible de changer votre propre rôle.',
+    agent_updateUserError: 'Échec de la mise à jour de l\'utilisateur : {error}',
+    agent_updateAgenciesError: 'Échec de la mise à jour des agences : {error}',
+    agent_passwordUpdateSkipped: 'Mise à jour du mot de passe ignorée en raison d\'un problème d\'initialisation.',
+    agent_passwordUpdateError: 'Échec de la mise à jour du mot de passe : {error}',
+    agent_updatedSuccess: 'Agent mis à jour avec succès.',
+    agent_updateError: 'Échec de la mise à jour de l\'agent : {error}',
+    agent_noPermissionDelete: "Vous n'avez pas la permission de supprimer des agents.",
+    agent_selfDeleteError: 'Impossible de supprimer votre propre compte.',
+    agent_confirmDelete: 'Êtes-vous sûr de vouloir supprimer cet agent ?',
+    agent_deleteAgenciesError: 'Échec de la suppression des assignations d\'agences : {error}',
+    agent_deleteUserError: 'Échec de la suppression de l\'enregistrement utilisateur : {error}',
+    agent_deleteAuthError: 'Échec de la suppression de l\'utilisateur auth : {error}',
+    agent_deletedSuccess: 'Agent supprimé avec succès.',
+    agent_deleteError: 'Échec de la suppression de l\'agent : {error}',
+    agent_editTitle: 'Modifier l\'Agent : {name}',
+    agent_addTitle: 'Ajouter un Nouvel Agent',
+    agent_update: 'Mettre à jour',
+    agent_add: 'Ajouter',
+    agent_yourProfile: 'Votre Profil',
+    agent_name: 'Nom',
+    agent_namePlaceholder: 'Entrez le nom',
+    agent_email: 'Email',
+    agent_emailPlaceholder: 'Entrez l\'email',
+    agent_phonePlaceholder: 'Entrez le numéro de téléphone',
+    agent_newPasswordOptional: 'Nouveau Mot de Passe (Optionnel)',
+    agent_password: 'Mot de Passe',
+    agent_passwordPlaceholder: 'Entrez le mot de passe',
+    agent_togglePasswordVisibility: 'Basculer la visibilité du mot de passe',
+    agent_role: 'Rôle',
+    agent_selfRoleLocked: 'Impossible de changer votre propre rôle.',
+    agent_selectRole: 'Sélectionnez le Rôle',
+    agent_agenciesOptional: 'Agences (Optionnel)',
+    agent_selectAgencies: 'Sélectionnez les Agences',
+    agent_selfAgenciesLocked: 'Impossible de changer vos propres agences.',
+    agent_noAgenciesAvailable: 'Aucune agence disponible.',
+    agent_selectAgenciesHelper: 'Sélectionnez une ou plusieurs agences.',
+    agent_cancel: 'Annuler',
+    loading: 'Chargement...',
+    retry: 'Réessayer',
+    agent_contactSupport: 'Si le problème persiste, contactez le support.',
+    agent_pageTitle: 'Gestion des Agents',
+    agent_listTitle: 'Liste des Agents',
+    agent_temporaryRole: 'Rôle Temporaire (Expire : {date})',
+    agent_addAgent: 'Ajouter un Agent',
+    agent_noAgents: 'Aucun agent trouvé. {action}',
+    agent_addAction: 'Ajoutez-en un ci-dessus.',
+    agent_contactAdminAction: 'Contactez votre administrateur.',
+    agent_table: 'Table des Agents',
+    agent_agencies: 'Agences',
+    agent_phone: 'Téléphone',
+    agent_actions: 'Actions',
+    agent_noAgencies: 'Aucune Agence',
+    agent_you: 'Vous',
+    agent_currentUser: 'Utilisateur Actuel',
+    agent_edit: 'Modifier',
+    agent_delete: 'Supprimer',
+    agent_profile: 'Profil de {name}',
+  },
+};
 
 // Breadcrumb Component
-const Breadcrumb = ({ title, children }) => (
+const Breadcrumb = ({ title, children, language, setLanguage }) => (
   <Box sx={{ mb: 2, transition: 'all 0.3s ease-in-out' }}>
-    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-      <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
-      {title}
+    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
+        {title}
+      </Box>
+      <Select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        size="small"
+        sx={{ minWidth: 60 }}
+      >
+        <MenuItem value="en">EN</MenuItem>
+        <MenuItem value="fr">FR</MenuItem>
+      </Select>
     </Typography>
     <Box sx={{ mt: 1 }}>{children}</Box>
   </Box>
@@ -254,7 +455,7 @@ const withTimeout = async (promise, ms = 10000) => {
 
 const AgentManagement = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const [language, setLanguage] = useState('fr');
   const [agents, setAgents] = useState([]);
   const [agencies, setAgencies] = useState([]);
   const [companyId, setCompanyId] = useState(null);
@@ -281,6 +482,14 @@ const AgentManagement = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'error' });
   const gridSpacing = 2;
 
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language][key] || key;
+    for (const param in params) {
+      text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+    }
+    return text;
+  }, [language]);
+
   const roleOptions = useCallback(() => {
     return ['Operations Manager', 'Agent Supervisor', 'Ticketing Agent'].filter((role) => {
       if (userRole === 'Super Admin') return true;
@@ -289,6 +498,8 @@ const AgentManagement = () => {
       return false;
     });
   }, [userRole]);
+
+  const memoizedRoleOptions = useMemo(() => roleOptions(), [roleOptions]);
 
   // Toggle password visibility
   const handleClickShowPassword = () => setShowPassword((prev) => !prev);
@@ -384,7 +595,12 @@ const AgentManagement = () => {
         setCompanyId(companyIdToUse);
 
         // Fetch agencies with role-based restrictions
-        let agencyQuery = supabase.from('agencies').select('id, name, address, phone, email, manager_name').eq('company_id', companyIdToUse);
+        let agencyQuery;
+        if (activeRole === 'Super Admin' && supabaseAdmin) {
+          agencyQuery = supabaseAdmin.from('agencies').select('id, name, address, phone, email, manager_name').eq('company_id', companyIdToUse);
+        } else {
+          agencyQuery = supabase.from('agencies').select('id, name, address, phone, email, manager_name').eq('company_id', companyIdToUse);
+        }
         let userAgenciesData = [];
         if (!roleMatrix[activeRole]?.canAssignAnyAgency) {
           const { data, error: userAgenciesError } = await withTimeout(
@@ -566,7 +782,7 @@ const AgentManagement = () => {
         });
         return;
       }
-      if (!roleMatrix[userRole]?.canAssignAnyRole && !roleOptions().includes(newAgent.role)) {
+      if (!roleMatrix[userRole]?.canAssignAnyRole && !memoizedRoleOptions.includes(newAgent.role)) {
         setSnackbar({ open: true, message: t('agent_invalidRole'), severity: 'error' });
         return;
       }
@@ -716,7 +932,7 @@ const AgentManagement = () => {
         });
         return;
       }
-      if (editAgent.user_id !== currentUserId && !roleMatrix[userRole]?.canAssignAnyRole && !roleOptions().includes(editAgent.role)) {
+      if (editAgent.user_id !== currentUserId && !roleMatrix[userRole]?.canAssignAnyRole && !memoizedRoleOptions.includes(editAgent.role)) {
         setSnackbar({ open: true, message: t('agent_invalidRole'), severity: 'error' });
         return;
       }
@@ -1164,7 +1380,7 @@ const AgentManagement = () => {
                     aria-describedby={isSelfEdit ? 'role-locked-helper-text' : undefined}
                   >
                     <MenuItem value="">{t('agent_selectRole')}</MenuItem>
-                    {roleOptions().map((role) => (
+                    {memoizedRoleOptions.map((role) => (
                       <MenuItem key={role} value={role}>
                         {role}
                       </MenuItem>
@@ -1284,7 +1500,7 @@ const AgentManagement = () => {
         <ErrorBoundary t={t}>
           <Box sx={{ p: 3 }}>
             <Typography variant="h6" color="error">
-              {t('agent_error', { error })}
+              {t('agent_error')}: {error}
             </Typography>
             <Button
               variant="contained"
@@ -1308,7 +1524,7 @@ const AgentManagement = () => {
       <CssBaseline />
       <ErrorBoundary t={t}>
         <Box sx={{ p: 3 }}>
-          <Breadcrumb title={t('agent_pageTitle')}>
+          <Breadcrumb title={t('agent_pageTitle')} language={language} setLanguage={setLanguage}>
             <Typography variant="subtitle2" color="primary" sx={{ display: 'flex', alignItems: 'center' }}>
               <PersonIcon sx={{ mr: 1, fontSize: '1rem' }} />
               {t('agent_pageTitle')}

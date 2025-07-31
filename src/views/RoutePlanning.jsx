@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import {
@@ -56,14 +56,314 @@ import {
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useTranslation } from './LanguageContext';
+
+// Translations
+const translations = {
+  en: {
+    route_error: 'Error',
+    route_unknownError: 'Unknown error: {error}',
+    route_errorDetails: 'Details: {details}',
+    route_noDetails: 'No details available',
+    route_refreshOrContact: 'Please refresh the page or contact support.',
+    route_sessionError: 'Session error: {error}',
+    route_loginRequired: 'Please login to continue.',
+    route_userFetchError: 'Failed to fetch user data: {error}',
+    route_noUserData: 'No user data found. Defaulting to Ticketing Agent role.',
+    route_noPermissionViewRoutes: 'You do not have permission to view routes.',
+    route_userAgenciesFetchError: 'Failed to fetch user agencies: {error}',
+    route_noCompany: 'No associated company found.',
+    route_companyFetchError: 'Failed to fetch company data: {error}',
+    route_agencyFetchError: 'Failed to fetch agencies: {error}',
+    route_dbError: 'Database error (code: {code}). Please try again later.',
+    route_fetchError: 'Failed to fetch data: {error}',
+    route_busFetchError: 'Failed to fetch buses: {error}',
+    route_routesFetchError: 'Failed to fetch routes: {error}',
+    route_passengerAssignmentsFetchError: 'Failed to fetch passenger assignments: {error}',
+    route_invalidRoutesFetchError: 'Failed to fetch invalid routes: {error}',
+    route_deleteRouteError: 'Failed to delete route {id}: {error}',
+    route_invalidRoutesCheckError: 'Failed to check invalid routes: {error}',
+    route_noPermissionElevation: 'You do not have permission to request elevation.',
+    route_elevationActive: 'Elevation is already active.',
+    route_elevationError: 'Failed to request elevation: {error}',
+    route_elevationSuccess: 'Elevation requested successfully.',
+    route_elevationFailed: 'Failed to request elevation: {error}',
+    route_noPermissionCreateRoute: 'You do not have permission to create routes.',
+    route_invalidBus: 'Invalid bus selected or bus is under maintenance.',
+    route_driverRequired: 'Driver is required.',
+    route_requiredFields: 'All fields are required.',
+    route_negativePrice: 'Price cannot be negative.',
+    route_addRouteError: 'Failed to add route: {error}',
+    route_addRouteSuccess: 'Route added successfully.',
+    route_addRouteFailed: 'Failed to add route: {error}',
+    route_noPermissionDeleteRoute: 'You do not have permission to delete routes.',
+    route_routeNotFound: 'Route not found.',
+    route_bookedRouteError: 'Cannot delete booked route.',
+    route_confirmDelete: 'Are you sure you want to delete this route?',
+    route_deleteRouteSuccess: 'Route deleted successfully.',
+    route_deleteRouteFailed: 'Failed to delete route: {error}',
+    route_noPermissionUpdateRoute: 'You do not have permission to update routes.',
+    route_bookedRouteEditError: 'Cannot edit booked route.',
+    route_noRouteToEdit: 'No route to edit.',
+    route_updateRouteError: 'Failed to update route: {error}',
+    route_updateRouteSuccess: 'Route updated successfully.',
+    route_updateRouteFailed: 'Failed to update route: {error}',
+    route_editTitle: 'Edit Route: {origin} to {destination}',
+    route_addTitle: 'Add New Route',
+    route_update: 'Update',
+    route_add: 'Add',
+    route_cancel: 'Cancel',
+    route_showHelp: 'Show Help',
+    route_help: 'Help',
+    route_editHelp: 'Edit the route from {origin} to {destination}',
+    route_details: 'Route Details',
+    route_origin: 'Origin',
+    route_originPlaceholder: 'Enter origin',
+    route_destination: 'Destination',
+    route_destinationPlaceholder: 'Enter destination',
+    route_intermediateStops: 'Intermediate Stops',
+    route_stop: 'Stop {number}',
+    route_stopPlaceholder: 'Enter stop',
+    route_remove: 'Remove',
+    route_addStop: 'Add Stop',
+    route_schedule: 'Schedule',
+    route_tripDate: 'Trip Date',
+    route_departureHour: 'Departure Hour',
+    route_hour: 'Hour',
+    route_departureMinutes: 'Departure Minutes',
+    route_minutes: 'Minutes',
+    route_selectDepartureHour: 'Select departure hour',
+    route_selectDepartureMinutes: 'Select departure minutes',
+    route_arrivalHour: 'Arrival Hour',
+    route_selectArrivalHour: 'Select arrival hour',
+    route_arrivalMinutes: 'Arrival Minutes',
+    route_selectArrivalMinutes: 'Select arrival minutes',
+    route_pricingAndBus: 'Pricing and Bus',
+    route_price: 'Price ({currency})',
+    route_pricePlaceholder: 'Enter price',
+    route_assignedBus: 'Assigned Bus',
+    route_selectBus: 'Select Bus',
+    route_selectBusPlaceholder: 'Select bus',
+    route_wifi: 'WiFi',
+    route_chargerPorts: 'Charger Ports',
+    route_airConditioning: 'Air Conditioning',
+    route_agencies: 'Agencies',
+    route_departureAgency: 'Departure Agency',
+    route_selectAgency: 'Select Agency',
+    route_selectDepartureAgency: 'Select departure agency',
+    route_arrivalAgency: 'Arrival Agency',
+    route_selectArrivalAgency: 'Select arrival agency',
+    route_arrestAgencies: 'Arrest Agencies',
+    route_arrestAgency: 'Arrest Agency {number}',
+    route_selectArrestAgency: 'Select arrest agency {number}',
+    route_removeArrestAgency: 'Remove Arrest Agency {number}',
+    route_addArrestAgency: 'Add Arrest Agency',
+    route_dropOffAgencies: 'Drop Off Agencies',
+    route_dropOffAgency: 'Drop Off Agency {number}',
+    route_selectDropOffAgency: 'Select drop off agency {number}',
+    route_removeDropOffAgency: 'Remove Drop Off Agency {number}',
+    route_addDropOffAgency: 'Add Drop Off Agency',
+    route_driverAssignment: 'Driver Assignment',
+    route_driver: 'Driver',
+    route_driverPlaceholder: 'Enter driver name',
+    route_updateRoute: 'Update Route',
+    route_addRoute: 'Add Route',
+    loading: 'Loading...',
+    route_noCompanyAssociated: 'No company associated with your account.',
+    route_contactAdminPrompt: 'Please contact your administrator.',
+    route_contactAdmin: 'Contact Admin',
+    route_returnToDashboard: 'Return to Dashboard',
+    route_createCompanyPrompt: 'Please create a company.',
+    route_createCompany: 'Create Company',
+    route_unrecognizedRole: 'Unrecognized role.',
+    route_contactSupportPrompt: 'Please contact support.',
+    route_contactSupport: 'Contact Support',
+    route_pageTitle: 'Route Planning',
+    route_temporaryRole: 'Temporary Role (Expires: {date})',
+    route_requestElevation: 'Request Elevation',
+    route_noRoutes: 'No routes found. {action}',
+    route_addRouteAction: 'Add one above.',
+    route_contactAdminAction: 'Contact your administrator.',
+    route_table: 'Routes Table',
+    route_stops: 'Stops',
+    route_date: 'Date',
+    route_departure: 'Departure',
+    route_arrival: 'Arrival',
+    route_bus: 'Bus',
+    route_busDetails: 'Bus Details',
+    route_noAmenities: 'No Amenities',
+    route_toilets: 'Toilets',
+    route_snacks: 'Snacks',
+    route_noAgencies: 'No Agencies',
+    route_passengers: 'Passengers',
+    route_actions: 'Actions',
+    route_edit: 'Edit',
+    route_delete: 'Delete',
+    route_na: 'N/A',
+    route_noStops: 'No Stops',
+    route_placeFetchError: 'Failed to fetch place suggestions: {error}',
+  },
+  fr: {
+    route_error: 'Erreur',
+    route_unknownError: 'Erreur inconnue : {error}',
+    route_errorDetails: 'Détails : {details}',
+    route_noDetails: 'Aucun détail disponible',
+    route_refreshOrContact: 'Veuillez rafraîchir la page ou contacter le support.',
+    route_sessionError: 'Erreur de session : {error}',
+    route_loginRequired: 'Veuillez vous connecter pour continuer.',
+    route_userFetchError: 'Échec de la récupération des données utilisateur : {error}',
+    route_noUserData: 'Aucune donnée utilisateur trouvée. Rôle par défaut : Agent de Billetterie.',
+    route_noPermissionViewRoutes: "Vous n'avez pas la permission de voir les itinéraires.",
+    route_userAgenciesFetchError: 'Échec de la récupération des agences utilisateur : {error}',
+    route_noCompany: 'Aucune entreprise associée trouvée.',
+    route_companyFetchError: "Échec de la récupération des données de l'entreprise : {error}",
+    route_agencyFetchError: 'Échec de la récupération des agences : {error}',
+    route_dbError: 'Erreur de base de données (code : {code}). Veuillez réessayer plus tard.',
+    route_fetchError: 'Échec de la récupération des données : {error}',
+    route_busFetchError: 'Échec de la récupération des bus : {error}',
+    route_routesFetchError: 'Échec de la récupération des itinéraires : {error}',
+    route_passengerAssignmentsFetchError: 'Échec de la récupération des assignations de passagers : {error}',
+    route_invalidRoutesFetchError: 'Échec de la récupération des itinéraires invalides : {error}',
+    route_deleteRouteError: 'Échec de la suppression de l\'itinéraire {id} : {error}',
+    route_invalidRoutesCheckError: 'Échec de la vérification des itinéraires invalides : {error}',
+    route_noPermissionElevation: "Vous n'avez pas la permission de demander une élévation.",
+    route_elevationActive: "L'élévation est déjà active.",
+    route_elevationError: "Échec de la demande d'élévation : {error}",
+    route_elevationSuccess: 'Élévation demandée avec succès.',
+    route_elevationFailed: "Échec de la demande d'élévation : {error}",
+    route_noPermissionCreateRoute: "Vous n'avez pas la permission de créer des itinéraires.",
+    route_invalidBus: 'Bus sélectionné invalide ou bus en maintenance.',
+    route_driverRequired: 'Le conducteur est requis.',
+    route_requiredFields: 'Tous les champs sont requis.',
+    route_negativePrice: 'Le prix ne peut pas être négatif.',
+    route_addRouteError: "Échec de l'ajout de l'itinéraire : {error}",
+    route_addRouteSuccess: 'Itinéraire ajouté avec succès.',
+    route_addRouteFailed: "Échec de l'ajout de l'itinéraire : {error}",
+    route_noPermissionDeleteRoute: "Vous n'avez pas la permission de supprimer des itinéraires.",
+    route_routeNotFound: 'Itinéraire non trouvé.',
+    route_bookedRouteError: 'Impossible de supprimer un itinéraire réservé.',
+    route_confirmDelete: 'Êtes-vous sûr de vouloir supprimer cet itinéraire ?',
+    route_deleteRouteSuccess: 'Itinéraire supprimé avec succès.',
+    route_deleteRouteFailed: 'Échec de la suppression de l\'itinéraire : {error}',
+    route_noPermissionUpdateRoute: "Vous n'avez pas la permission de mettre à jour des itinéraires.",
+    route_bookedRouteEditError: 'Impossible de modifier un itinéraire réservé.',
+    route_noRouteToEdit: 'Aucun itinéraire à modifier.',
+    route_updateRouteError: 'Échec de la mise à jour de l\'itinéraire : {error}',
+    route_updateRouteSuccess: 'Itinéraire mis à jour avec succès.',
+    route_updateRouteFailed: 'Échec de la mise à jour de l\'itinéraire : {error}',
+    route_editTitle: 'Modifier l\'Itinéraire : {origin} à {destination}',
+    route_addTitle: 'Ajouter un Nouvel Itinéraire',
+    route_update: 'Mettre à jour',
+    route_add: 'Ajouter',
+    route_cancel: 'Annuler',
+    route_showHelp: 'Afficher l\'Aide',
+    route_help: 'Aide',
+    route_editHelp: 'Modifier l\'itinéraire de {origin} à {destination}',
+    route_details: 'Détails de l\'Itinéraire',
+    route_origin: 'Origine',
+    route_originPlaceholder: 'Entrez l\'origine',
+    route_destination: 'Destination',
+    route_destinationPlaceholder: 'Entrez la destination',
+    route_intermediateStops: 'Arrêts Intermédiaires',
+    route_stop: 'Arrêt {number}',
+    route_stopPlaceholder: 'Entrez l\'arrêt',
+    route_remove: 'Supprimer',
+    route_addStop: 'Ajouter un Arrêt',
+    route_schedule: 'Horaire',
+    route_tripDate: 'Date du Voyage',
+    route_departureHour: 'Heure de Départ',
+    route_hour: 'Heure',
+    route_departureMinutes: 'Minutes de Départ',
+    route_minutes: 'Minutes',
+    route_selectDepartureHour: 'Sélectionnez l\'heure de départ',
+    route_selectDepartureMinutes: 'Sélectionnez les minutes de départ',
+    route_arrivalHour: 'Heure d\'Arrivée',
+    route_selectArrivalHour: 'Sélectionnez l\'heure d\'arrivée',
+    route_arrivalMinutes: 'Minutes d\'Arrivée',
+    route_selectArrivalMinutes: 'Sélectionnez les minutes d\'arrivée',
+    route_pricingAndBus: 'Tarification et Bus',
+    route_price: 'Prix ({currency})',
+    route_pricePlaceholder: 'Entrez le prix',
+    route_assignedBus: 'Bus Assigné',
+    route_selectBus: 'Sélectionnez le Bus',
+    route_selectBusPlaceholder: 'Sélectionnez le bus',
+    route_wifi: 'WiFi',
+    route_chargerPorts: 'Ports de Charge',
+    route_airConditioning: 'Climatisation',
+    route_agencies: 'Agences',
+    route_departureAgency: 'Agence de Départ',
+    route_selectAgency: 'Sélectionnez l\'Agence',
+    route_selectDepartureAgency: 'Sélectionnez l\'agence de départ',
+    route_arrivalAgency: 'Agence d\'Arrivée',
+    route_selectArrivalAgency: 'Sélectionnez l\'agence d\'arrivée',
+    route_arrestAgencies: 'Agences d\'Arrêt',
+    route_arrestAgency: 'Agence d\'Arrêt {number}',
+    route_selectArrestAgency: 'Sélectionnez l\'agence d\'arrêt {number}',
+    route_removeArrestAgency: 'Supprimer l\'Agence d\'Arrêt {number}',
+    route_addArrestAgency: 'Ajouter une Agence d\'Arrêt',
+    route_dropOffAgencies: 'Agences de Dépose',
+    route_dropOffAgency: 'Agence de Dépose {number}',
+    route_selectDropOffAgency: 'Sélectionnez l\'agence de dépose {number}',
+    route_removeDropOffAgency: 'Supprimer l\'Agence de Dépose {number}',
+    route_addDropOffAgency: 'Ajouter une Agence de Dépose',
+    route_driverAssignment: 'Assignation du Conducteur',
+    route_driver: 'Conducteur',
+    route_driverPlaceholder: 'Entrez le nom du conducteur',
+    route_updateRoute: 'Mettre à jour l\'Itinéraire',
+    route_addRoute: 'Ajouter l\'Itinéraire',
+    loading: 'Chargement...',
+    route_noCompanyAssociated: 'Aucune entreprise associée à votre compte.',
+    route_contactAdminPrompt: 'Veuillez contacter votre administrateur.',
+    route_contactAdmin: 'Contacter l\'Admin',
+    route_returnToDashboard: 'Retour au Tableau de Bord',
+    route_createCompanyPrompt: 'Veuillez créer une entreprise.',
+    route_createCompany: 'Créer une Entreprise',
+    route_unrecognizedRole: 'Rôle non reconnu.',
+    route_contactSupportPrompt: 'Veuillez contacter le support.',
+    route_contactSupport: 'Contacter le Support',
+    route_pageTitle: 'Planification des Itinéraires',
+    route_temporaryRole: 'Rôle Temporaire (Expire : {date})',
+    route_requestElevation: 'Demander une Élévation',
+    route_noRoutes: 'Aucun itinéraire trouvé. {action}',
+    route_addRouteAction: 'Ajoutez-en un ci-dessus.',
+    route_contactAdminAction: 'Contactez votre administrateur.',
+    route_table: 'Table des Itinéraires',
+    route_stops: 'Arrêts',
+    route_date: 'Date',
+    route_departure: 'Départ',
+    route_arrival: 'Arrivée',
+    route_bus: 'Bus',
+    route_busDetails: 'Détails du Bus',
+    route_noAmenities: 'Aucun Aménagement',
+    route_toilets: 'Toilettes',
+    route_snacks: 'Collations',
+    route_noAgencies: 'Aucune Agence',
+    route_passengers: 'Passagers',
+    route_actions: 'Actions',
+    route_edit: 'Modifier',
+    route_delete: 'Supprimer',
+    route_na: 'N/A',
+    route_noStops: 'Aucun Arrêt',
+    route_placeFetchError: 'Échec de la récupération des suggestions de lieux : {error}',
+  },
+};
 
 // Breadcrumb Component
-const Breadcrumb = ({ title, children }) => (
+const Breadcrumb = ({ title, children, language, setLanguage }) => (
   <Box sx={{ mb: 2, transition: 'all 0.3s ease-in-out' }}>
-    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-      <MapIcon sx={{ mr: 1, color: 'primary.main' }} />
-      {title}
+    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <MapIcon sx={{ mr: 1, color: 'primary.main' }} />
+        {title}
+      </Box>
+      <Select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        size="small"
+        sx={{ minWidth: 60 }}
+      >
+        <MenuItem value="en">EN</MenuItem>
+        <MenuItem value="fr">FR</MenuItem>
+      </Select>
     </Typography>
     <Box sx={{ mt: 1 }}>{children}</Box>
   </Box>
@@ -178,12 +478,12 @@ const roleMatrix = {
     canCreateRoute: true,
     canUpdateRoute: true,
     canDeleteRoute: true,
-    canEditAllRoutes: true, // New permission
-    canDeleteAllRoutes: true, // New permission
+    canEditAllRoutes: true,
+    canDeleteAllRoutes: true,
     canViewAgencies: true,
-    canCreateAgency: true,
-    canUpdateAgency: true,
-    canDeleteAgency: true,
+    canCreateAgency: false,
+    canUpdateAgency: false,
+    canDeleteAgency: false,
     canRequestElevation: false,
   },
   'Operations Manager': {
@@ -191,11 +491,11 @@ const roleMatrix = {
     canCreateRoute: true,
     canUpdateRoute: true,
     canDeleteRoute: true,
-    canEditAllRoutes: true, // New permission
-    canDeleteAllRoutes: true, // New permission
+    canEditAllRoutes: true,
+    canDeleteAllRoutes: true,
     canViewAgencies: true,
-    canCreateAgency: true,
-    canUpdateAgency: true,
+    canCreateAgency: false,
+    canUpdateAgency: false,
     canDeleteAgency: false,
     canRequestElevation: false,
   },
@@ -229,7 +529,7 @@ const roleMatrix = {
 
 const RoutePlanning = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const [language, setLanguage] = useState('fr');
   const [routes, setRoutes] = useState([]);
   const [agencies, setAgencies] = useState([]);
   const [buses, setBuses] = useState([]);
@@ -237,14 +537,6 @@ const RoutePlanning = () => {
   const [companyId, setCompanyId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [newAgency, setNewAgency] = useState({
-    name: '',
-    address: '',
-    phone: '',
-    email: '',
-    manager_name: '',
-  });
-  const [showAddAgencyForm, setShowAddAgencyForm] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -281,6 +573,14 @@ const RoutePlanning = () => {
   const minutesOptions = ['00', '15', '30', '45'];
   const today = '2025-05-30';
 
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language][key] || key;
+    for (const param in params) {
+      text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+    }
+    return text;
+  }, [language]);
+
   // Role-based no company message
   const getNoCompanyMessage = () => {
     switch (userRole) {
@@ -294,11 +594,7 @@ const RoutePlanning = () => {
               {t('route_createCompanyPrompt')}
             </Typography>
             <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate('/create-transport-company')}
-              sx={{ mt: 2 }}
-              aria-label={t('route_createCompany')}
+
             >
               {t('route_createCompany')}
             </Button>
@@ -316,20 +612,12 @@ const RoutePlanning = () => {
               {t('route_contactAdminPrompt')}
             </Typography>
             <Button
-              variant="contained"
-              color="primary"
-              onClick={() => window.open('https://support.example.com', '_blank')}
-              sx={{ mt: 2 }}
-              aria-label={t('route_contactAdmin')}
+        
             >
               {t('route_contactAdmin')}
             </Button>
             <Button
-              variant="outlined"
-              color="secondary"
-              onClick={() => navigate('/dashboard/default')}
-              sx={{ mt: 2, ml: 2 }}
-              aria-label={t('route_returnToDashboard')}
+         
             >
               {t('route_returnToDashboard')}
             </Button>
@@ -345,11 +633,7 @@ const RoutePlanning = () => {
               {t('route_contactSupportPrompt')}
             </Typography>
             <Button
-              variant="contained"
-              color="primary"
-              onClick={() => window.open('https://support.example.com', '_blank')}
-              sx={{ mt: 2 }}
-              aria-label={t('route_contactSupport')}
+    
             >
               {t('route_contactSupport')}
             </Button>
@@ -453,7 +737,7 @@ const RoutePlanning = () => {
           .select('id, name, address, phone, email, manager_name, company_id, created_at, updated_at')
           .eq('company_id', companyIdToUse)
           .order('name', { ascending: true });
-        if (!roleMatrix[activeRole]?.canCreateAgency) {
+        if (!roleMatrix[activeRole]?.canViewAgencies) {
           const allowedAgencyIds = userAgenciesData.map((ua) => ua.agency_id);
           if (allowedAgencyIds.length > 0) {
             agencyQuery = agencyQuery.in('id', allowedAgencyIds);
@@ -661,7 +945,7 @@ const RoutePlanning = () => {
     }
   };
 
-  // Google Places Autocomplete
+  // Cameroon Places Autocomplete
   const fetchPlaceSuggestions = useCallback(async (query, setOptions) => {
     if (!query || query.length < 3) {
       setOptions([]);
@@ -669,28 +953,24 @@ const RoutePlanning = () => {
     }
 
     try {
-      const apiKey = process.env.REACT_APP_GOOGLE_API_KEY || "YOUR_GOOGLE_API_KEY";
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
-          query
-        )}&types=(cities)&language=${t('route_languageCode')}&key=${apiKey}`
-      );
-      const data = await response.json();
-      if (data.status === 'OK') {
-        const suggestions = data.predictions
-          .filter((prediction) => prediction.structured_formatting.main_text)
-          .map((prediction) => ({
-            label: prediction.structured_formatting.main_text,
-            value: prediction.structured_formatting.main_text,
-            placeId: prediction.place_id,
-          }));
-        setOptions(suggestions);
-      } else {
-        setOptions([]);
-      }
+      const { data, error } = await supabase
+        .from('cameroon_places')
+        .select('id, name, type, region, department, arrondissement')
+        .ilike('name', `%${query}%`)
+        .order('name', { ascending: true })
+        .limit(10);
+      if (error) throw new Error(t('route_placeFetchError', { error: error.message }));
+      const suggestions = data.map((place) => ({
+        label: `${place.name} (${place.type}, ${place.region}${place.department ? `, ${place.department}` : ''}${place.arrondissement ? `, ${place.arrondissement}` : ''})`,
+        value: place.name,
+        placeId: place.id,
+      }));
+      setOptions(suggestions);
+      logSuccess('PlaceSuggestionsFetch', 'Places fetched successfully', { query, count: suggestions.length });
     } catch (error) {
       logError('PlaceSuggestionsFetch', error);
       setOptions([]);
+      toast.error(t('route_placeFetchError', { error: error.message }));
     }
   }, [t]);
 
@@ -727,43 +1007,6 @@ const RoutePlanning = () => {
     if (!timeString) return { hours: '', minutes: '' };
     const [hours, minutes] = timeString.split(':');
     return { hours: hours || '', minutes: minutes || '' };
-  };
-
-  const addAgency = async (e) => {
-    e.preventDefault();
-    if (!roleMatrix[userRole]?.canCreateAgency) {
-      toast.error(t('route_noPermissionCreateAgency'));
-      return;
-    }
-    try {
-      if (!newAgency.name.trim() || agencies.some((a) => a.name === newAgency.name.trim())) {
-        toast.error(t('route_invalidAgencyName'));
-        return;
-      }
-      if (!newAgency.address || !newAgency.phone || !newAgency.email || !newAgency.manager_name) {
-        toast.error(t('route_requiredAgencyFields'));
-        return;
-      }
-      const { error } = await supabase
-        .from('agencies')
-        .insert([{ ...newAgency, company_id: companyId }]);
-      if (error) throw new Error(t('route_addAgencyError', { error: error.message }));
-      const { data } = await supabase
-        .from('agencies')
-        .select('id, name, address, phone, email, manager_name, company_id, created_at, updated_at')
-        .eq('company_id', companyId);
-      setAgencies(data || []);
-      setNewAgency({ name: '', address: '', phone: '', email: '', manager_name: '' });
-      setShowAddAgencyForm(false);
-      toast.success(t('route_addAgencySuccess'));
-    } catch (error) {
-      logError('AgencyAdd', error);
-      toast.error(
-        error.message.includes('infinite recursion')
-          ? t('route_dbError', { code: error.code || 'N/A' })
-          : t('route_addAgencyFailed', { error: error.message })
-      );
-    }
   };
 
   const addRoute = async (e) => {
@@ -1072,7 +1315,9 @@ const RoutePlanning = () => {
     }
   };
 
-  const availableBuses = buses.filter((bus) => bus.status !== 'Maintenance');
+  const availableBuses = useMemo(() => {
+    return buses.filter((bus) => bus.status !== 'Maintenance');
+  }, [buses]);
 
   const getAvailableArrestAgencies = (dropOffAgencies, departureAgencyId, arrivalAgencyId) => {
     return agencies.filter(
@@ -1091,142 +1336,6 @@ const RoutePlanning = () => {
         agency.id !== arrivalAgencyId
     );
   };
-
-  const renderAgencyForm = () => (
-    <Box
-      sx={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        bgcolor: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 1300,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: 2,
-        animation: 'fadeIn 0.3s ease-in-out',
-        '@keyframes fadeIn': { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
-      }}
-      onClick={() => setShowAddAgencyForm(false)}
-    >
-      <Card
-        sx={{
-          width: '80%',
-          maxWidth: 600,
-          maxHeight: '80vh',
-          overflow: 'auto',
-          transition: 'transform 0.3s ease-in-out',
-          transform: 'scale(1)',
-          '&:hover': { transform: 'scale(1.02)' },
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <CardHeader
-          title={
-            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
-              <AddCircleOutlineIcon sx={{ verticalAlign: 'middle', mr: 1, color: theme.palette.primary.main }} />
-              {t('route_addAgencyTitle')}
-            </Typography>
-          }
-        />
-        <Divider />
-        <CardContent>
-          <form onSubmit={addAgency}>
-            <Grid container spacing={gridSpacing}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('route_agencyName')}
-                  value={newAgency.name}
-                  onChange={(e) => setNewAgency({ ...newAgency, name: e.target.value })}
-                  placeholder={t('route_agencyNamePlaceholder')}
-                  required
-                  variant="outlined"
-                  InputProps={{ startAdornment: <StoreIcon sx={{ mr: 1, color: 'text.secondary' }} /> }}
-                  aria-label={t('route_agencyName')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('route_agencyAddress')}
-                  value={newAgency.address}
-                  onChange={(e) => setNewAgency({ ...newAgency, address: e.target.value })}
-                  placeholder={t('route_agencyAddressPlaceholder')}
-                  required
-                  variant="outlined"
-                  aria-label={t('route_agencyAddress')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('route_agencyPhone')}
-                  value={newAgency.phone}
-                  onChange={(e) => setNewAgency({ ...newAgency, phone: e.target.value })}
-                  placeholder={t('route_agencyPhonePlaceholder')}
-                  required
-                  variant="outlined"
-                  aria-label={t('route_agencyPhone')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('route_agencyEmail')}
-                  value={newAgency.email}
-                  onChange={(e) => setNewAgency({ ...newAgency, email: e.target.value })}
-                  placeholder={t('route_agencyEmailPlaceholder')}
-                  required
-                  type="email"
-                  variant="outlined"
-                  aria-label={t('route_agencyEmail')}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label={t('route_agencyManagerName')}
-                  value={newAgency.manager_name}
-                  onChange={(e) => setNewAgency({ ...newAgency, manager_name: e.target.value })}
-                  placeholder={t('route_agencyManagerNamePlaceholder')}
-                  required
-                  variant="outlined"
-                  aria-label={t('route_agencyManagerName')}
-                />
-              </Grid>
-              <Grid item xs={12} sx={{ mt: 2 }}>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    disabled={!roleMatrix[userRole]?.canCreateAgency}
-                    sx={{ '&:hover': { backgroundColor: theme.palette.primary.dark, transform: 'scale(1.05)' } }}
-                    aria-label={t('route_addAgency')}
-                  >
-                    <CheckIcon sx={{ mr: 1 }} />
-                    {t('route_addAgency')}
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    onClick={() => setShowAddAgencyForm(false)}
-                    sx={{ '&:hover': { borderColor: theme.palette.error.main, color: theme.palette.error.main, transform: 'scale(1.05)' } }}
-                    aria-label={t('route_cancel')}
-                  >
-                    <CloseIcon sx={{ mr: 1 }} />
-                    {t('route_cancel')}
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
-          </form>
-        </CardContent>
-      </Card>
-    </Box>
-  );
 
   const renderRouteForm = (isEdit = false) => {
     const routeData = isEdit ? editRoute : newRoute;
@@ -1900,7 +2009,7 @@ const RoutePlanning = () => {
       <CssBaseline />
       <ErrorBoundary t={t}>
         <Box sx={{ p: 3 }}>
-          <Breadcrumb title={t('route_pageTitle')}>
+          <Breadcrumb title={t('route_pageTitle')} language={language} setLanguage={setLanguage}>
             <Typography
               variant="subtitle2"
               color="primary"
@@ -1946,18 +2055,6 @@ const RoutePlanning = () => {
                           aria-label={t('route_requestElevation')}
                         >
                           {t('route_requestElevation')}
-                        </Button>
-                      )}
-                      {roleMatrix[userRole]?.canCreateAgency && (
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={() => setShowAddAgencyForm(true)}
-                          startIcon={<AddCircleOutlineIcon />}
-                          sx={{ '&:hover': { backgroundColor: theme.palette.secondary.dark, transform: 'scale(1.05)' } }}
-                          aria-label={t('route_addAgency')}
-                        >
-                          {t('route_addAgency')}
                         </Button>
                       )}
                       {roleMatrix[userRole]?.canCreateRoute && (
@@ -2258,7 +2355,6 @@ const RoutePlanning = () => {
               </Card>
             </Grid>
           </Grid>
-          {showAddAgencyForm && renderAgencyForm()}
           {showAddForm && renderRouteForm(false)}
           {showEditForm && editRoute && renderRouteForm(true)}
         </Box>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,6 +25,7 @@ import {
   CssBaseline,
   CircularProgress,
   Chip,
+  Select,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -42,7 +43,202 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Breadcrumb from 'component/Breadcrumb';
 import { gridSpacing } from 'config.js';
 import { supabase } from './supabase';
-import { useTranslation } from './LanguageContext';
+
+// Translations
+const translations = {
+  en: {
+    bus_error: 'Error',
+    bus_unknownError: 'Unknown error: {error}',
+    bus_refreshOrContact: 'Please refresh the page or contact support.',
+    bus_loginRequired: 'Please login to continue.',
+    bus_userFetchError: 'Failed to fetch user data: {error}',
+    bus_noPermission: 'You do not have permission to access this page.',
+    bus_noCompany: 'No associated company found.',
+    bus_companyFetchError: 'Failed to fetch company data: {error}',
+    bus_agencyFetchError: 'Failed to fetch agencies: {error}',
+    bus_userAgenciesFetchError: 'Failed to fetch user agencies: {error}',
+    bus_fetchError: 'Failed to fetch buses: {error}',
+    bus_fetchFailed: 'Failed to fetch data.',
+    bus_elevationRestricted: 'Elevation is only available for Agent Supervisors.',
+    bus_elevationActive: 'Temporary elevation is already active.',
+    bus_elevationError: 'Failed to elevate role: {error}',
+    bus_elevationSuccess: 'Role elevated to Operations Manager for 24 hours.',
+    bus_elevationFailed: 'Failed to elevate role: {error}',
+    bus_noPermissionCreate: 'You do not have permission to create buses.',
+    bus_invalidData: 'Invalid bus data. Please check all fields.',
+    bus_duplicateBus: 'Duplicate bus number or license plate.',
+    bus_addError: 'Failed to add bus: {error}',
+    bus_addSuccess: 'Bus added successfully.',
+    bus_addFailed: 'Failed to add bus.',
+    bus_noPermissionDelete: 'You do not have permission to delete buses.',
+    bus_confirmDelete: 'Are you sure you want to delete this bus?',
+    bus_deleteError: 'Failed to delete bus: {error}',
+    bus_deleteSuccess: 'Bus deleted successfully.',
+    bus_deleteFailed: 'Failed to delete bus.',
+    bus_noPermissionUpdate: 'You do not have permission to update buses.',
+    bus_updateError: 'Failed to update bus: {error}',
+    bus_updateSuccess: 'Bus updated successfully.',
+    bus_updateFailed: 'Failed to update bus.',
+    bus_editTitle: 'Edit Bus: {number}',
+    bus_addTitle: 'Add New Bus',
+    bus_update: 'Update',
+    bus_add: 'Add',
+    bus_help: 'Help',
+    bus_editHelp: 'Editing bus {number}. Update fields as needed.',
+    bus_details: 'Bus Details',
+    bus_number: 'Bus Number',
+    bus_numberPlaceholder: 'Enter bus number',
+    bus_numberHelper: 'Unique identifier for the bus',
+    bus_model: 'Model',
+    bus_modelPlaceholder: 'Enter model',
+    bus_modelHelper: 'Bus model name',
+    bus_capacity: 'Capacity',
+    bus_capacityPlaceholder: 'Enter capacity',
+    bus_capacityHelper: 'Number of seats',
+    bus_licensePlate: 'License Plate',
+    bus_licensePlatePlaceholder: 'Enter license plate',
+    bus_licensePlateHelper: 'License plate number',
+    bus_type: 'Bus Type',
+    bus_typeHelper: 'Select bus type',
+    bus_typeStandard: 'Standard',
+    bus_typeVIP: 'VIP',
+    bus_typeVVIP: 'VVIP',
+    bus_amenities: 'Amenities',
+    bus_noAmenities: 'None',
+    bus_agency: 'Agency',
+    bus_selectAgency: 'Select Agency',
+    bus_agencyHelper: 'Assign to an agency',
+    bus_driverAssignment: 'Driver Assignment',
+    bus_driver: 'Driver',
+    bus_driverPlaceholder: 'Enter driver name',
+    bus_driverHelper: 'Assigned driver',
+    bus_status: 'Status',
+    bus_statusHelper: 'Bus status',
+    bus_statusActive: 'Active',
+    bus_statusMaintenance: 'Maintenance',
+    bus_cancel: 'Cancel',
+    loading: 'Loading...',
+    bus_errorInstructions: 'If the problem persists, contact support.',
+    bus_createCompany: 'Create Company',
+    bus_pageTitle: 'Bus Management',
+    bus_temporaryRole: 'Temporary Role (Expires: {date})',
+    bus_requestElevation: 'Request Elevation',
+    bus_addBus: 'Add Bus',
+    bus_noBuses: 'No buses found.',
+    bus_table: 'Buses Table',
+    bus_actions: 'Actions',
+    bus_row: 'Bus {number}',
+    bus_edit: 'Edit',
+    bus_delete: 'Delete',
+  },
+  fr: {
+    bus_error: 'Erreur',
+    bus_unknownError: 'Erreur inconnue : {error}',
+    bus_refreshOrContact: 'Veuillez rafraîchir la page ou contacter le support.',
+    bus_loginRequired: 'Veuillez vous connecter pour continuer.',
+    bus_userFetchError: 'Échec de la récupération des données utilisateur : {error}',
+    bus_noPermission: "Vous n'avez pas la permission d'accéder à cette page.",
+    bus_noCompany: 'Aucune entreprise associée trouvée.',
+    bus_companyFetchError: 'Échec de la récupération des données de l\'entreprise : {error}',
+    bus_agencyFetchError: 'Échec de la récupération des agences : {error}',
+    bus_userAgenciesFetchError: 'Échec de la récupération des agences utilisateur : {error}',
+    bus_fetchError: 'Échec de la récupération des bus : {error}',
+    bus_fetchFailed: 'Échec de la récupération des données.',
+    bus_elevationRestricted: 'L\'élévation est disponible uniquement pour les Superviseurs d\'Agents.',
+    bus_elevationActive: 'L\'élévation temporaire est déjà active.',
+    bus_elevationError: 'Échec de l\'élévation du rôle : {error}',
+    bus_elevationSuccess: 'Rôle élevé à Gestionnaire des Opérations pour 24 heures.',
+    bus_elevationFailed: 'Échec de l\'élévation du rôle : {error}',
+    bus_noPermissionCreate: "Vous n'avez pas la permission de créer des bus.",
+    bus_invalidData: 'Données de bus invalides. Veuillez vérifier tous les champs.',
+    bus_duplicateBus: 'Numéro de bus ou plaque d\'immatriculation en double.',
+    bus_addError: 'Échec de l\'ajout du bus : {error}',
+    bus_addSuccess: 'Bus ajouté avec succès.',
+    bus_addFailed: 'Échec de l\'ajout du bus.',
+    bus_noPermissionDelete: "Vous n'avez pas la permission de supprimer des bus.",
+    bus_confirmDelete: 'Êtes-vous sûr de vouloir supprimer ce bus ?',
+    bus_deleteError: 'Échec de la suppression du bus : {error}',
+    bus_deleteSuccess: 'Bus supprimé avec succès.',
+    bus_deleteFailed: 'Échec de la suppression du bus.',
+    bus_noPermissionUpdate: "Vous n'avez pas la permission de mettre à jour des bus.",
+    bus_updateError: 'Échec de la mise à jour du bus : {error}',
+    bus_updateSuccess: 'Bus mis à jour avec succès.',
+    bus_updateFailed: 'Échec de la mise à jour du bus.',
+    bus_editTitle: 'Modifier le Bus : {number}',
+    bus_addTitle: 'Ajouter un Nouveau Bus',
+    bus_update: 'Mettre à jour',
+    bus_add: 'Ajouter',
+    bus_help: 'Aide',
+    bus_editHelp: 'Modification du bus {number}. Mettez à jour les champs si nécessaire.',
+    bus_details: 'Détails du Bus',
+    bus_number: 'Numéro du Bus',
+    bus_numberPlaceholder: 'Entrez le numéro du bus',
+    bus_numberHelper: 'Identifiant unique pour le bus',
+    bus_model: 'Modèle',
+    bus_modelPlaceholder: 'Entrez le modèle',
+    bus_modelHelper: 'Nom du modèle du bus',
+    bus_capacity: 'Capacité',
+    bus_capacityPlaceholder: 'Entrez la capacité',
+    bus_capacityHelper: 'Nombre de sièges',
+    bus_licensePlate: 'Plaque d\'Immatriculation',
+    bus_licensePlatePlaceholder: 'Entrez la plaque d\'immatriculation',
+    bus_licensePlateHelper: 'Numéro de plaque d\'immatriculation',
+    bus_type: 'Type de Bus',
+    bus_typeHelper: 'Sélectionnez le type de bus',
+    bus_typeStandard: 'Standard',
+    bus_typeVIP: 'VIP',
+    bus_typeVVIP: 'VVIP',
+    bus_amenities: 'Équipements',
+    bus_noAmenities: 'Aucun',
+    bus_agency: 'Agence',
+    bus_selectAgency: 'Sélectionnez l\'Agence',
+    bus_agencyHelper: 'Assigner à une agence',
+    bus_driverAssignment: 'Assignation du Conducteur',
+    bus_driver: 'Conducteur',
+    bus_driverPlaceholder: 'Entrez le nom du conducteur',
+    bus_driverHelper: 'Conducteur assigné',
+    bus_status: 'Statut',
+    bus_statusHelper: 'Statut du bus',
+    bus_statusActive: 'Actif',
+    bus_statusMaintenance: 'Maintenance',
+    bus_cancel: 'Annuler',
+    loading: 'Chargement...',
+    bus_errorInstructions: 'Si le problème persiste, contactez le support.',
+    bus_createCompany: 'Créer une Entreprise',
+    bus_pageTitle: 'Gestion des Bus',
+    bus_temporaryRole: 'Rôle Temporaire (Expire : {date})',
+    bus_requestElevation: 'Demander Élévation',
+    bus_addBus: 'Ajouter un Bus',
+    bus_noBuses: 'Aucun bus trouvé.',
+    bus_table: 'Table des Bus',
+    bus_actions: 'Actions',
+    bus_row: 'Bus {number}',
+    bus_edit: 'Modifier',
+    bus_delete: 'Supprimer',
+  },
+};
+
+// Breadcrumb Component
+const CustomBreadcrumb = ({ title, children, language, setLanguage }) => (
+  <Box sx={{ mb: 2, transition: 'all 0.3s ease-in-out' }}>
+    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <DirectionsBusIcon sx={{ mr: 1, color: 'primary.main' }} />
+        {title}
+      </Box>
+      <Select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        size="small"
+        sx={{ minWidth: 60 }}
+      >
+        <MenuItem value="en">EN</MenuItem>
+        <MenuItem value="fr">FR</MenuItem>
+      </Select>
+    </Typography>
+    <Box sx={{ mt: 1 }}>{children}</Box>
+  </Box>
+);
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -162,7 +358,7 @@ const roleMatrix = {
 
 const BusManagement = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const [language, setLanguage] = useState('fr');
   const [buses, setBuses] = useState([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
@@ -188,11 +384,19 @@ const BusManagement = () => {
   const [agencies, setAgencies] = useState([]);
 
   // Define amenities for each bus type
-  const busAmenities = {
+  const busAmenities = useMemo(() => ({
     Standard: [],
     VIP: ['AC', 'Charge Port', 'Wi-Fi'],
     VVIP: ['AC', 'Charge Port', 'Wi-Fi', 'Toilets', 'Snacks'],
-  };
+  }), []);
+
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language][key] || key;
+    for (const param in params) {
+      text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+    }
+    return text;
+  }, [language]);
 
   const withTimeout = async (promise, ms = 10000) => {
     const timeout = new Promise((_, reject) =>
@@ -774,11 +978,7 @@ const BusManagement = () => {
         </Typography>
         {error.message.includes(t('bus_noCompany')) && (
           <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate('/manage-transport-company')}
-            sx={{ mt: 2 }}
-            aria-label={t('bus_createCompany')}
+       
           >
             {t('bus_createCompany')}
           </Button>
@@ -792,7 +992,7 @@ const BusManagement = () => {
       <CssBaseline />
       <ErrorBoundary t={t}>
         <Box sx={{ p: 3 }}>
-          <Breadcrumb title={t('bus_pageTitle')}>
+          <CustomBreadcrumb title={t('bus_pageTitle')} language={language} setLanguage={setLanguage}>
             <Typography
               variant="subtitle2"
               color="primary"
@@ -802,7 +1002,7 @@ const BusManagement = () => {
               <DirectionsBusIcon sx={{ mr: 1, fontSize: '1rem' }} />
               {t('bus_pageTitle')}
             </Typography>
-          </Breadcrumb>
+          </CustomBreadcrumb>
           <Grid container spacing={gridSpacing}>
             <Grid item xs={12}>
               <Card sx={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)' }}>

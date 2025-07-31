@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from './supabase';
 import {
@@ -33,14 +33,142 @@ import {
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useTranslation } from './LanguageContext';
+
+// Translations
+const translations = {
+  en: {
+    messages_error: 'Error',
+    messages_unknownError: 'Unknown error: {error}',
+    messages_errorDetails: 'Details: {details}',
+    messages_noDetails: 'No details available',
+    messages_refreshOrContact: 'Please refresh the page or contact support.',
+    messages_sessionError: 'Session error: {error}',
+    messages_loginRequired: 'Please login to continue.',
+    messages_userFetchError: 'Failed to fetch user data: {error}',
+    messages_noPermission: 'You do not have permission to access this page.',
+    messages_noCompany: 'No associated company found.',
+    messages_companyFetchError: 'Failed to fetch company data: {error}',
+    messages_agencyFetchError: 'Failed to fetch agencies: {error}',
+    messages_dbError: 'Database error (code: {code}). Please try again later.',
+    messages_fetchError: 'Failed to fetch data: {error}',
+    messages_routeFetchError: 'Failed to fetch routes: {error}',
+    messages_reservationFetchError: 'Failed to fetch reservations: {error}',
+    messages_noPermissionSend: 'You do not have permission to send messages.',
+    messages_noMessageContent: 'Message content is required.',
+    messages_messageTooLong: 'Message is too long (max 160 characters).',
+    messages_selectAgencyRouteError: 'Please select an agency and route.',
+    messages_selectAgencyError: 'Please select an agency.',
+    messages_noReservationsFound: 'No reservations found for the selected criteria.',
+    messages_noUsersFound: 'No users found for the selected reservations.',
+    messages_profilesFetchError: 'Failed to fetch profiles: {error}',
+    messages_noValidPhoneNumbers: 'No valid phone numbers found.',
+    messages_sendMessageError: 'Failed to send message: {error}',
+    messages_noMessagesSent: 'No messages were sent successfully.',
+    messages_messageSentSuccess: '{count} messages sent successfully ({sms} SMS, {whatsapp} WhatsApp). {failed} failed.',
+    messages_pageTitle: 'Messages',
+    messages_sendMessage: 'Send Message',
+    messages_recipientType: 'Recipient Type',
+    messages_selectRecipientType: 'Select the type of recipients',
+    messages_allClients: 'All Company Clients',
+    messages_agencyClients: 'Agency Clients',
+    messages_routeClients: 'Route Clients',
+    messages_selectAgency: 'Select Agency',
+    messages_chooseAgency: 'Choose an agency',
+    messages_selectRoute: 'Select Route',
+    messages_chooseRoute: 'Choose a route',
+    messages_message: 'Message',
+    messages_messagePlaceholder: 'Enter your message here (max 160 characters)',
+    messages_routeRecipient: 'Message will be sent to clients of route: {route}',
+    messages_agencyRecipient: 'Message will be sent to clients of agency: {name}',
+    messages_companyRecipient: 'Message will be sent to all company clients',
+    messages_send: 'Send',
+    messages_noAgencies: 'No Agencies',
+    messages_noAgenciesMessage: 'No agencies found. Contact your administrator.',
+    messages_contactAdmin: 'Contact Support',
+    returnToDashboard: 'Return to Dashboard',
+    messages_temporaryRole: 'Temporary Role (Expires: {date})',
+    messages_requiredRoles: 'Required roles: Super Admin or Operations Manager. Your role: {role}',
+    messages_criticalError: 'Critical Error',
+    messages_unknown: 'Unknown',
+    retry: 'Retry',
+    loading: 'Loading...',
+  },
+  fr: {
+    messages_error: 'Erreur',
+    messages_unknownError: 'Erreur inconnue : {error}',
+    messages_errorDetails: 'Détails : {details}',
+    messages_noDetails: 'Aucun détail disponible',
+    messages_refreshOrContact: 'Veuillez rafraîchir la page ou contacter le support.',
+    messages_sessionError: 'Erreur de session : {error}',
+    messages_loginRequired: 'Veuillez vous connecter pour continuer.',
+    messages_userFetchError: 'Échec de la récupération des données utilisateur : {error}',
+    messages_noPermission: "Vous n'avez pas la permission d'accéder à cette page.",
+    messages_noCompany: 'Aucune entreprise associée trouvée.',
+    messages_companyFetchError: "Échec de la récupération des données de l'entreprise : {error}",
+    messages_agencyFetchError: 'Échec de la récupération des agences : {error}',
+    messages_dbError: 'Erreur de base de données (code : {code}). Veuillez réessayer plus tard.',
+    messages_fetchError: 'Échec de la récupération des données : {error}',
+    messages_routeFetchError: 'Échec de la récupération des itinéraires : {error}',
+    messages_reservationFetchError: 'Échec de la récupération des réservations : {error}',
+    messages_noPermissionSend: "Vous n'avez pas la permission d'envoyer des messages.",
+    messages_noMessageContent: 'Le contenu du message est requis.',
+    messages_messageTooLong: 'Le message est trop long (max 160 caractères).',
+    messages_selectAgencyRouteError: "Veuillez sélectionner une agence et un itinéraire.",
+    messages_selectAgencyError: "Veuillez sélectionner une agence.",
+    messages_noReservationsFound: 'Aucune réservation trouvée pour les critères sélectionnés.',
+    messages_noUsersFound: 'Aucun utilisateur trouvé pour les réservations sélectionnées.',
+    messages_profilesFetchError: 'Échec de la récupération des profils : {error}',
+    messages_noValidPhoneNumbers: 'Aucun numéro de téléphone valide trouvé.',
+    messages_sendMessageError: "Échec de l'envoi du message : {error}",
+    messages_noMessagesSent: "Aucun message n'a été envoyé avec succès.",
+    messages_messageSentSuccess: '{count} messages envoyés avec succès ({sms} SMS, {whatsapp} WhatsApp). {failed} échoués.',
+    messages_pageTitle: 'Messages',
+    messages_sendMessage: 'Envoyer un Message',
+    messages_recipientType: 'Type de Destinataire',
+    messages_selectRecipientType: 'Sélectionnez le type de destinataires',
+    messages_allClients: "Tous les Clients de l'Entreprise",
+    messages_agencyClients: "Clients d'Agence",
+    messages_routeClients: "Clients d'Itinéraire",
+    messages_selectAgency: "Sélectionner l'Agence",
+    messages_chooseAgency: 'Choisissez une agence',
+    messages_selectRoute: "Sélectionner l'Itinéraire",
+    messages_chooseRoute: 'Choisissez un itinéraire',
+    messages_message: 'Message',
+    messages_messagePlaceholder: 'Entrez votre message ici (max 160 caractères)',
+    messages_routeRecipient: "Le message sera envoyé aux clients de l'itinéraire : {route}",
+    messages_agencyRecipient: "Le message sera envoyé aux clients de l'agence : {name}",
+    messages_companyRecipient: "Le message sera envoyé à tous les clients de l'entreprise",
+    messages_send: 'Envoyer',
+    messages_noAgencies: 'Aucune Agence',
+    messages_noAgenciesMessage: 'Aucune agence trouvée. Contactez votre administrateur.',
+    messages_contactAdmin: 'Contacter le Support',
+    returnToDashboard: 'Retour au Tableau de Bord',
+    messages_temporaryRole: 'Rôle Temporaire (Expire : {date})',
+    messages_requiredRoles: 'Rôles requis : Super Admin ou Operations Manager. Votre rôle : {role}',
+    messages_criticalError: 'Erreur Critique',
+    messages_unknown: 'Inconnu',
+    retry: 'Réessayer',
+    loading: 'Chargement...',
+  },
+};
 
 // Breadcrumb Component
-const Breadcrumb = ({ title, children }) => (
+const Breadcrumb = ({ title, children, language, setLanguage }) => (
   <Box sx={{ mb: 2, transition: 'all 0.3s ease-in-out' }}>
-    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-      <MessageIcon sx={{ mr: 1, color: 'primary.main' }} />
-      {title}
+    <Typography variant="h4" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <MessageIcon sx={{ mr: 1, color: 'primary.main' }} />
+        {title}
+      </Box>
+      <Select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value)}
+        size="small"
+        sx={{ minWidth: 60 }}
+      >
+        <MenuItem value="en">EN</MenuItem>
+        <MenuItem value="fr">FR</MenuItem>
+      </Select>
     </Typography>
     <Box sx={{ mt: 1 }}>{children}</Box>
   </Box>
@@ -161,7 +289,7 @@ const predefinedCountryCodes = {
   'CAN': '+1', // Canada
 };
 
-// Utility function to format phone number for WhatsApp (enhanced for Cameroon formats)
+// Utility function to format phone number for SMS (enhanced for Cameroon formats)
 const formatPhoneNumber = (phoneNumber, countryCode = null) => {
   if (!phoneNumber) return null;
   // Remove non-digit characters except +
@@ -209,14 +337,13 @@ const roleMatrix = {
 
 const Messages = () => {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const [language, setLanguage] = useState('fr');
   const [companyId, setCompanyId] = useState(null);
   const [agencies, setAgencies] = useState([]);
   const [selectedAgencyId, setSelectedAgencyId] = useState('');
   const [routes, setRoutes] = useState([]);
   const [selectedRouteId, setSelectedRouteId] = useState('');
   const [reservations, setReservations] = useState([]);
-  const [messages, setMessages] = useState([]);
   const [messageContent, setMessageContent] = useState('');
   const [recipientType, setRecipientType] = useState('company');
   const [loading, setLoading] = useState(true);
@@ -227,6 +354,14 @@ const Messages = () => {
   const [userAgencies, setUserAgencies] = useState([]);
   const [retryCount, setRetryCount] = useState(0);
   const maxRetries = 3;
+
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language][key] || key;
+    for (const param in params) {
+      text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+    }
+    return text;
+  }, [language]);
 
   // Fetch initial data
   useEffect(() => {
@@ -352,23 +487,12 @@ const Messages = () => {
         if (reservationsError) throw new Error(t('messages_reservationFetchError', { error: reservationsError.message }));
         setReservations(reservationsData || []);
 
-        const { data: messagesData, error: messagesError } = await supabase
-          .from('messages')
-          .select('id, agency_id, reservation_id, route_id, phone_number, message_content, channel, status, error_message, sent_at')
-          .eq('company_id', companyIdToUse)
-          .order('sent_at', { ascending: false });
-        if (messagesError && messagesError.code !== '42P01') {
-          throw new Error(t('messages_messageFetchError', { error: messagesError.message }));
-        }
-        setMessages(messagesData || []);
-
         logSuccess('InitialDataFetch', 'Initial data fetched successfully', {
           userId: session.user.id,
           companyId: companyIdToUse,
           agencyCount: agenciesData.length,
           routeCount: routesData.length,
           reservationCount: reservationsData.length,
-          messageCount: messagesData?.length || 0,
           role: activeRole,
         });
       } catch (error) {
@@ -434,7 +558,7 @@ const Messages = () => {
     fetchRoutes();
   }, [selectedAgencyId, companyId, userAgencies, userRole, t]);
 
-  // Send message to clients with WhatsApp and SMS fallback
+  // Send message to clients with SMS
   const sendMessage = useCallback(async () => {
     if (!roleMatrix[userRole]?.canSendMessages) {
       toast.error(t('messages_noPermissionSend'));
@@ -519,7 +643,7 @@ const Messages = () => {
         message: messageContent,
         phone_numbers: uniqueValidPhoneNumbers,
         companyId,
-        channel: 'whatsapp', // Prioritize WhatsApp
+        channel: 'sms', // Prioritize SMS
       };
 
       const response = await fetch('https://tiemlljkttqmragiaydg.supabase.co/functions/v1/send_message', {
@@ -541,31 +665,6 @@ const Messages = () => {
       const failedCount = results.length - sentCount;
       const whatsappCount = results.filter((r) => r.status === 'sent' && r.channel === 'whatsapp').length;
       const smsCount = results.filter((r) => r.status === 'sent' && r.channel === 'sms').length;
-
-      if (results.length > 0) {
-        const messageInserts = results.map((r) => ({
-          company_id: companyId,
-          agency_id: recipientType === 'agency' || recipientType === 'route' ? selectedAgencyId : null,
-          reservation_id: null,
-          route_id: recipientType === 'route' ? selectedRouteId : null,
-          phone_number: r.phone_number,
-          message_content: messageContent,
-          channel: r.channel,
-          status: r.status,
-          error_message: r.error || null,
-          sent_at: new Date().toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }));
-
-        const { error: insertError } = await supabase.from('messages').insert(messageInserts);
-        if (insertError) {
-          logError('MessageInsert', insertError);
-          toast.warn(t('messages_messageInsertError'));
-        } else {
-          setMessages((prev) => [...messageInserts, ...prev]);
-        }
-      }
 
       if (sentCount === 0) {
         toast.warn(t('messages_noMessagesSent'));
@@ -590,6 +689,10 @@ const Messages = () => {
     }
   }, [messageContent, recipientType, selectedRouteId, selectedAgencyId, companyId, userRole, reservations, t]);
 
+  const filteredRoutes = useMemo(() => {
+    return routes.filter((route) => route.departure_agency_id === selectedAgencyId || route.arrival_agency_id === selectedAgencyId);
+  }, [routes, selectedAgencyId]);
+
   // Permission check for page access
   if (!roleMatrix[userRole]?.canViewMessages) {
     return (
@@ -604,9 +707,7 @@ const Messages = () => {
               {t('messages_requiredRoles', { role: userRole || t('messages_noRole') })}
             </Typography>
             <Button
-              variant="contained"
-              onClick={() => navigate('/dashboard')}
-              sx={{ mt: 2 }}
+      
             >
               {t('returnToDashboard')}
             </Button>
@@ -660,7 +761,7 @@ const Messages = () => {
         <CssBaseline />
         <ErrorBoundary t={t}>
           <Box sx={{ p: 3 }}>
-            <Breadcrumb title={t('messages_pageTitle')}>
+            <Breadcrumb title={t('messages_pageTitle')} language={language} setLanguage={setLanguage}>
               <Typography
                 variant="subtitle2"
                 color="primary"
@@ -695,18 +796,12 @@ const Messages = () => {
                   {t('messages_noAgenciesMessage')}
                 </Typography>
                 <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => window.open('https://support.example.com', '_blank')}
-                  sx={{ mt: 2 }}
+              
                 >
                   {t('messages_contactAdmin')}
                 </Button>
                 <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={() => navigate('/dashboard/default')}
-                  sx={{ mt: 2, ml: 2 }}
+                 
                 >
                   {t('returnToDashboard')}
                 </Button>
@@ -724,7 +819,7 @@ const Messages = () => {
         <CssBaseline />
         <ErrorBoundary t={t}>
           <Box sx={{ p: 3 }}>
-            <Breadcrumb title={t('messages_pageTitle')}>
+            <Breadcrumb title={t('messages_pageTitle')} language={language} setLanguage={setLanguage}>
               <Typography
                 variant="subtitle2"
                 color="primary"
@@ -822,13 +917,11 @@ const Messages = () => {
                             aria-label={t('messages_selectRoute')}
                           >
                             <MenuItem value="">{t('messages_chooseRoute')}</MenuItem>
-                            {routes
-                              .filter((route) => route.departure_agency_id === selectedAgencyId || route.arrival_agency_id === selectedAgencyId)
-                              .map((route) => (
-                                <MenuItem key={route.id} value={route.id}>
-                                  {`${route.origin} to ${route.destination} - ${new Date(route.trip_date).toLocaleDateString()} ${route.departure_time} - ${route.buses?.bus_type || 'Unknown'}`}
-                                </MenuItem>
-                              ))}
+                            {filteredRoutes.map((route) => (
+                              <MenuItem key={route.id} value={route.id}>
+                                {`${route.origin} to ${route.destination} - ${new Date(route.trip_date).toLocaleDateString()} ${route.departure_time} - ${route.buses?.bus_type || 'Unknown'}`}
+                              </MenuItem>
+                            ))}
                           </TextField>
                         </Grid>
                       )}
@@ -872,117 +965,6 @@ const Messages = () => {
                         </Button>
                       </Grid>
                     </Grid>
-                    <Box sx={{ mt: 4 }}>
-                      <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-                        <MessageIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
-                        {t('messages_messageHistory')}
-                      </Typography>
-                      <TableContainer component={Paper} sx={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
-                        <Table>
-                          <TableHead>
-                            <TableRow sx={{ backgroundColor: theme.palette.primary.main }}>
-                              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <MessageIcon sx={{ mr: 1 }} />
-                                  {t('messages_messageId')}
-                                </Box>
-                              </TableCell>
-                              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <MessageIcon sx={{ mr: 1 }} />
-                                  {t('messages_recipient')}
-                                </Box>
-                              </TableCell>
-                              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <MessageIcon sx={{ mr: 1 }} />
-                                  {t('messages_content')}
-                                </Box>
-                              </TableCell>
-                              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <MessageIcon sx={{ mr: 1 }} />
-                                  {t('messages_channel')}
-                                </Box>
-                              </TableCell>
-                              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <MessageIcon sx={{ mr: 1 }} />
-                                  {t('messages_status')}
-                                </Box>
-                              </TableCell>
-                              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <MessageIcon sx={{ mr: 1 }} />
-                                  {t('messages_sentDate')}
-                                </Box>
-                              </TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {messages.length === 0 ? (
-                              <TableRow>
-                                <TableCell colSpan={6} align="center">
-                                  <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <MessageIcon sx={{ mr: 1, color: theme.palette.info.main }} />
-                                    {t('messages_noMessages')}
-                                  </Typography>
-                                </TableCell>
-                              </TableRow>
-                            ) : (
-                              messages.map((message) => (
-                                <TableRow key={message.id}>
-                                  <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <MessageIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
-                                      {message.id}
-                                    </Box>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <MessageIcon sx={{ mr: 1, color: theme.palette.info.main }} />
-                                      {message.route_id
-                                        ? t('messages_routeLabel', {
-                                            route: routes.find((r) => r.id === message.route_id)
-                                              ? `${routes.find((r) => r.id === message.route_id).origin} to ${routes.find((r) => r.id === message.route_id).destination} - ${new Date(routes.find((r) => r.id === message.route_id).trip_date).toLocaleDateString()} ${routes.find((r) => r.id === message.route_id).departure_time}`
-                                              : 'N/A',
-                                          })
-                                        : message.agency_id
-                                        ? t('messages_agencyLabel', { name: agencies.find((a) => a.id === message.agency_id)?.name || 'N/A' })
-                                        : t('messages_allClientsLabel')}
-                                    </Box>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <MessageIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
-                                      {message.message_content}
-                                    </Box>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <MessageIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
-                                      {message.channel}
-                                    </Box>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <MessageIcon sx={{ mr: 1, color: message.status === 'sent' ? theme.palette.success.main : theme.palette.error.main }} />
-                                      {message.status}{message.error_message && ` (${message.error_message})`}
-                                    </Box>
-                                  </TableCell>
-                                  <TableCell>
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                      <MessageIcon sx={{ mr: 1, color: theme.palette.info.main }} />
-                                      {new Date(message.sent_at).toLocaleString()}
-                                    </Box>
-                                  </TableCell>
-                                </TableRow>
-                              ))
-                            )}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
@@ -1004,9 +986,7 @@ const Messages = () => {
             {t('messages_unknownError', { error: error.message || t('messages_unknown') })}
           </Typography>
           <Button
-            variant="contained"
-            onClick={() => navigate('/dashboard')}
-            sx={{ mt: 2 }}
+        
           >
             {t('returnToDashboard')}
           </Button>

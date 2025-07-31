@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -28,7 +28,218 @@ import 'react-phone-number-input/style.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { supabase } from './supabase';
-import { useTranslation } from './LanguageContext';
+
+// Translations
+const translations = {
+  en: {
+    company_error: 'Error',
+    company_unknownError: 'Unknown error: {error}',
+    company_errorDetails: 'Details: {details}',
+    company_noDetails: 'No details available',
+    company_contactSupport: 'Please contact support.',
+    company_retry: 'Retry',
+    company_refresh: 'Refresh Page',
+    company_copyError: 'Copy Error Details',
+    company_support: 'Support',
+    company_networkError: 'Network Error',
+    company_criticalError: 'Critical Error',
+    company_hideDetails: 'Hide Details',
+    company_showDetails: 'Show Details',
+    company_supabaseNotInitialized: 'Supabase client not initialized.',
+    company_loginRequired: 'Please login to continue.',
+    company_noSession: 'No active session.',
+    company_userAgenciesFetchError: 'Failed to fetch user agencies: {error}',
+    company_companyFetchError: 'Failed to fetch company: {error}',
+    company_agenciesFetchError: 'Failed to fetch agencies: {error}',
+    company_fetchFailed: 'Failed to fetch data.',
+    company_noPermission: 'You do not have permission to access this page.',
+    company_noPermissionCreate: 'You do not have permission to create a company.',
+    company_sessionError: 'Session error: {error}',
+    company_nameRequired: 'Company name is required.',
+    company_locationRequired: 'Headquarters location is required.',
+    company_phoneRequired: 'Contact phone is required.',
+    company_invalidEmail: 'Invalid email format.',
+    company_emailRequired: 'Contact email is required.',
+    company_scopeRequired: 'Operational scope is required.',
+    company_logoRequired: 'Logo is required.',
+    company_invalidFileType: 'Invalid file type. Only JPEG, PNG, GIF allowed.',
+    company_fileSizeLimit: 'File size must be less than 5MB.',
+    company_missingUserId: 'Missing user ID for logo upload.',
+    company_logoUploadError: 'Failed to upload logo: {error}',
+    company_publicUrlError: 'Failed to get public URL for logo.',
+    company_duplicateEmail: 'Duplicate email.',
+    company_createError: 'Failed to create company: {error}',
+    company_roleAssignError: 'Failed to assign role: {error}',
+    company_createSuccess: 'Company created successfully.',
+    company_createFailed: 'Failed to create company.',
+    company_noPermissionSaveAgency: 'You do not have permission to save agencies.',
+    company_noPermissionUpdateAgency: 'You do not have permission to update agencies.',
+    company_noPermissionCreateAgency: 'You do not have permission to create agencies.',
+    company_duplicateAgencyName: 'Duplicate agency name.',
+    company_saveAgencyError: 'Failed to save agency: {error}',
+    company_agencyUpdated: 'Agency updated successfully.',
+    company_agencyCreated: 'Agency created successfully.',
+    company_saveAgencyFailed: 'Failed to save agency.',
+    company_noPermissionDeleteAgency: 'You do not have permission to delete agencies.',
+    company_deleteAgencyError: 'Failed to delete agency: {error}',
+    company_agencyDeleted: 'Agency deleted successfully.',
+    company_deleteAgencyFailed: 'Failed to delete agency.',
+    company_elevationExists: 'Elevation request already exists.',
+    company_elevationError: 'Failed to request elevation: {error}',
+    company_elevationSuccess: 'Elevation requested successfully.',
+    company_elevationFailed: 'Failed to request elevation.',
+    company_pageTitle: 'Transport Company Management',
+    company_createTitle: 'Create Transport Company',
+    company_name: 'Company Name',
+    company_headquarters: 'Headquarters Location',
+    company_phonePlaceholder: 'Enter phone number',
+    company_email: 'Email',
+    company_operationalScope: 'Operational Scope',
+    company_scopeRegional: 'Regional',
+    company_scopeInternational: 'International',
+    company_logo: 'Logo',
+    company_logoAlt: 'Company Logo',
+    company_cancel: 'Cancel',
+    company_create: 'Create',
+    company_overview: 'Company Overview',
+    company_menu: 'Menu',
+    company_edit: 'Edit Company',
+    company_requestElevation: 'Request Temporary Elevation',
+    company_elevationTitle: 'Temporary Role Elevation',
+    company_elevationDescription: 'Request temporary elevation to Operations Manager for 24 hours.',
+    company_agencies: 'Agencies',
+    company_addAgency: 'Add Agency',
+    company_editAgency: 'Edit Agency',
+    company_agencyName: 'Agency Name',
+    company_agencyAddress: 'Agency Address',
+    company_agencyPhone: 'Agency Phone',
+    company_agencyEmail: 'Agency Email',
+    company_managerName: 'Manager Name',
+    company_cancelEdit: 'Cancel Edit',
+    company_updateAgency: 'Update Agency',
+    company_searchAgencies: 'Search Agencies',
+    company_searchPlaceholder: 'Search by name, address, or email',
+    company_noSearchResults: 'No agencies match your search.',
+    company_noAgencies: 'No agencies found. {action}',
+    company_addAgencyAction: 'Add one above.',
+    company_contactAdminAction: 'Contact your administrator.',
+    company_agencyTable: 'Agencies Table',
+    company_actions: 'Actions',
+    company_agencyRow: 'Agency: {name}',
+    company_agencyNameRequired: 'Agency name is required.',
+    company_agencyAddressRequired: 'Agency address is required.',
+    company_agencyPhoneRequired: 'Agency phone is required.',
+    company_agencyEmailRequired: 'Agency email is required.',
+    company_managerNameRequired: 'Manager name is required.',
+    company_editTitle: 'Edit Company',
+    company_updatedSuccess: 'Company updated successfully.',
+    company_updateFailed: 'Failed to update company.',
+  },
+  fr: {
+    company_error: 'Erreur',
+    company_unknownError: 'Erreur inconnue : {error}',
+    company_errorDetails: 'Détails : {details}',
+    company_noDetails: 'Aucun détail disponible',
+    company_contactSupport: 'Veuillez contacter le support.',
+    company_retry: 'Réessayer',
+    company_refresh: 'Rafraîchir la Page',
+    company_copyError: 'Copier les Détails de l\'Erreur',
+    company_support: 'Support',
+    company_networkError: 'Erreur de Réseau',
+    company_criticalError: 'Erreur Critique',
+    company_hideDetails: 'Masquer les Détails',
+    company_showDetails: 'Afficher les Détails',
+    company_supabaseNotInitialized: 'Client Supabase non initialisé.',
+    company_loginRequired: 'Veuillez vous connecter pour continuer.',
+    company_noSession: 'Aucune session active.',
+    company_userAgenciesFetchError: 'Échec de la récupération des agences utilisateur : {error}',
+    company_companyFetchError: 'Échec de la récupération de l\'entreprise : {error}',
+    company_agenciesFetchError: 'Échec de la récupération des agences : {error}',
+    company_fetchFailed: 'Échec de la récupération des données.',
+    company_noPermission: 'Vous n\'avez pas la permission d\'accéder à cette page.',
+    company_noPermissionCreate: 'Vous n\'avez pas la permission de créer une entreprise.',
+    company_sessionError: 'Erreur de session : {error}',
+    company_nameRequired: 'Le nom de l\'entreprise est requis.',
+    company_locationRequired: 'L\'emplacement du siège est requis.',
+    company_phoneRequired: 'Le téléphone de contact est requis.',
+    company_invalidEmail: 'Format d\'email invalide.',
+    company_emailRequired: 'L\'email de contact est requis.',
+    company_scopeRequired: 'La portée opérationnelle est requise.',
+    company_logoRequired: 'Le logo est requis.',
+    company_invalidFileType: 'Type de fichier invalide. Seuls JPEG, PNG, GIF autorisés.',
+    company_fileSizeLimit: 'La taille du fichier doit être inférieure à 5 Mo.',
+    company_missingUserId: 'ID utilisateur manquant pour le téléchargement du logo.',
+    company_logoUploadError: 'Échec du téléchargement du logo : {error}',
+    company_publicUrlError: 'Échec de l\'obtention de l\'URL publique pour le logo.',
+    company_duplicateEmail: 'Email dupliqué.',
+    company_createError: 'Échec de la création de l\'entreprise : {error}',
+    company_roleAssignError: 'Échec de l\'assignation du rôle : {error}',
+    company_createSuccess: 'Entreprise créée avec succès.',
+    company_createFailed: 'Échec de la création de l\'entreprise.',
+    company_noPermissionSaveAgency: 'Vous n\'avez pas la permission de sauvegarder les agences.',
+    company_noPermissionUpdateAgency: 'Vous n\'avez pas la permission de mettre à jour les agences.',
+    company_noPermissionCreateAgency: 'Vous n\'avez pas la permission de créer des agences.',
+    company_duplicateAgencyName: 'Nom d\'agence dupliqué.',
+    company_saveAgencyError: 'Échec de la sauvegarde de l\'agence : {error}',
+    company_agencyUpdated: 'Agence mise à jour avec succès.',
+    company_agencyCreated: 'Agence créée avec succès.',
+    company_saveAgencyFailed: 'Échec de la sauvegarde de l\'agence.',
+    company_noPermissionDeleteAgency: 'Vous n\'avez pas la permission de supprimer des agences.',
+    company_deleteAgencyError: 'Échec de la suppression de l\'agence : {error}',
+    company_agencyDeleted: 'Agence supprimée avec succès.',
+    company_deleteAgencyFailed: 'Échec de la suppression de l\'agence.',
+    company_elevationExists: 'Demande d\'élévation déjà existante.',
+    company_elevationError: 'Échec de la demande d\'élévation : {error}',
+    company_elevationSuccess: 'Élévation demandée avec succès.',
+    company_elevationFailed: 'Échec de la demande d\'élévation.',
+    company_pageTitle: 'Gestion de la Compagnie de Transport',
+    company_createTitle: 'Créer une Compagnie de Transport',
+    company_name: 'Nom de la Compagnie',
+    company_headquarters: 'Emplacement du Siège',
+    company_phonePlaceholder: 'Entrez le numéro de téléphone',
+    company_email: 'Email',
+    company_operationalScope: 'Portée Opérationnelle',
+    company_scopeRegional: 'Régionale',
+    company_scopeInternational: 'Internationale',
+    company_logo: 'Logo',
+    company_logoAlt: 'Logo de la Compagnie',
+    company_cancel: 'Annuler',
+    company_create: 'Créer',
+    company_overview: 'Aperçu de la Compagnie',
+    company_menu: 'Menu',
+    company_edit: 'Modifier la Compagnie',
+    company_requestElevation: 'Demander une Élévation Temporaire',
+    company_elevationTitle: 'Élévation Temporaire de Rôle',
+    company_elevationDescription: 'Demander une élévation temporaire à Operations Manager pour 24 heures.',
+    company_agencies: 'Agences',
+    company_addAgency: 'Ajouter une Agence',
+    company_editAgency: 'Modifier l\'Agence',
+    company_agencyName: 'Nom de l\'Agence',
+    company_agencyAddress: 'Adresse de l\'Agence',
+    company_agencyPhone: 'Téléphone de l\'Agence',
+    company_agencyEmail: 'Email de l\'Agence',
+    company_managerName: 'Nom du Manager',
+    company_cancelEdit: 'Annuler la Modification',
+    company_updateAgency: 'Mettre à Jour l\'Agence',
+    company_searchAgencies: 'Rechercher des Agences',
+    company_searchPlaceholder: 'Rechercher par nom, adresse ou email',
+    company_noSearchResults: 'Aucune agence ne correspond à votre recherche.',
+    company_noAgencies: 'Aucune agence trouvée. {action}',
+    company_addAgencyAction: 'Ajoutez-en une ci-dessus.',
+    company_contactAdminAction: 'Contactez votre administrateur.',
+    company_agencyTable: 'Table des Agences',
+    company_actions: 'Actions',
+    company_agencyRow: 'Agence : {name}',
+    company_agencyNameRequired: 'Le nom de l\'agence est requis.',
+    company_agencyAddressRequired: 'L\'adresse de l\'agence est requise.',
+    company_agencyPhoneRequired: 'Le téléphone de l\'agence est requis.',
+    company_agencyEmailRequired: 'L\'email de l\'agence est requis.',
+    company_managerNameRequired: 'Le nom du manager est requis.',
+    company_editTitle: 'Modifier la Compagnie',
+    company_updatedSuccess: 'Compagnie mise à jour avec succès.',
+    company_updateFailed: 'Échec de la mise à jour de la compagnie.',
+  },
+};
 
 const logError = (context, error, info = {}) => {
   console.error(`[${new Date().toISOString()}] ${context}:`, {
@@ -153,7 +364,7 @@ const fetchRoles = async (userId) => {
 const CreateTransportCompany = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const [language, setLanguage] = useState('fr');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [company, setCompany] = useState(null);
@@ -167,6 +378,15 @@ const CreateTransportCompany = () => {
   const [temporaryElevation, setTemporaryElevation] = useState(null);
   const [openElevationDialog, setOpenElevationDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showEditCompany, setShowEditCompany] = useState(false);
+
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language][key] || key;
+    for (const param in params) {
+      text = text.replace(new RegExp(`{${param}}`, 'g'), params[param]);
+    }
+    return text;
+  }, [language]);
 
   const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -351,18 +571,16 @@ const CreateTransportCompany = () => {
     }
   }, [navigate, t]);
 
-  useEffect(() => {
+  const memoizedFilteredAgencies = useMemo(() => {
     if (!searchQuery) {
-      setFilteredAgencies(agencies);
+      return agencies;
     } else {
       const lowerQuery = searchQuery.toLowerCase();
-      setFilteredAgencies(
-        agencies.filter(
-          agency =>
-            agency?.name?.toLowerCase().includes(lowerQuery) ||
-            agency?.address?.toLowerCase().includes(lowerQuery) ||
-            agency?.email?.toLowerCase().includes(lowerQuery)
-        )
+      return agencies.filter(
+        agency =>
+          agency?.name?.toLowerCase().includes(lowerQuery) ||
+          agency?.address?.toLowerCase().includes(lowerQuery) ||
+          agency?.email?.toLowerCase().includes(lowerQuery)
       );
     }
   }, [searchQuery, agencies]);
@@ -472,6 +690,44 @@ const CreateTransportCompany = () => {
     } finally {
       setSubmitting(false);
       logSuccess('CompanyCreate', `Completed in ${performance.now() - start}ms`);
+    }
+  };
+
+  // Update company
+  const handleUpdateCompany = async (values, { setSubmitting }) => {
+    const start = performance.now();
+    try {
+      if (!roleFlags.canManageCompany) throw new Error(t('company_noPermissionCreate'));
+      let logoUrl = company.logo_url;
+      if (values.logoFile) {
+        logoUrl = await handleLogoUpload(values.logoFile, company.user_id);
+      }
+      const updateData = {
+        name: values.companyName,
+        headquarters_location: values.headquartersLocation,
+        contact_phone: values.contactPhone,
+        contact_email: values.contactEmail,
+        operational_scope: values.operationalScope,
+        logo_url: logoUrl,
+      };
+      const { error: updateError } = await supabase
+        .from('transport_companies')
+        .update(updateData)
+        .eq('id', company.id);
+      if (updateError) {
+        if (updateError.code === '23505') throw new Error(t('company_duplicateEmail'));
+        throw new Error(t('company_createError', { error: updateError.message }));
+      }
+      setCompany({ ...company, ...updateData });
+      setShowEditCompany(false);
+      toast.success(t('company_updatedSuccess'));
+    } catch (error) {
+      logError('CompanyUpdate', error);
+      toast.error(error.message || t('company_updateFailed'));
+      setError(error);
+    } finally {
+      setSubmitting(false);
+      logSuccess('CompanyUpdate', `Completed in ${performance.now() - start}ms`);
     }
   };
 
@@ -599,10 +855,21 @@ const CreateTransportCompany = () => {
   return (
     <ErrorBoundary t={t}>
       <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
-        <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <BusinessIcon /> {t('company_pageTitle')}
-          {role && <Chip label={role} color={role === 'Super Admin' ? 'primary' : role === 'Operations Manager' ? 'secondary' : 'default'} sx={{ ml: 2 }} />}
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <BusinessIcon /> {t('company_pageTitle')}
+            {role && <Chip label={role} color={role === 'Super Admin' ? 'primary' : role === 'Operations Manager' ? 'secondary' : 'default'} sx={{ ml: 2 }} />}
+          </Typography>
+          <Select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            size="small"
+            sx={{ minWidth: 60 }}
+          >
+            <MenuItem value="en">EN</MenuItem>
+            <MenuItem value="fr">FR</MenuItem>
+          </Select>
+        </Box>
 
         {!company ? (
           roleFlags.canManageCompany ? (
@@ -744,12 +1011,7 @@ const CreateTransportCompany = () => {
                       </Grid>
                       <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
                         <Button
-                          color="secondary"
-                          variant="outlined"
-                          startIcon={<CancelIcon />}
-                          onClick={() => navigate('/dashboard/default')}
-                          sx={{ flex: 1 }}
-                          aria-label={t('company_cancel')}
+                    
                         >
                           {t('company_cancel')}
                         </Button>
@@ -786,8 +1048,8 @@ const CreateTransportCompany = () => {
                     <MoreVertIcon />
                   </IconButton>
                   <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
-                    <MenuItem onClick={() => { handleMenuClose(); navigate(`/company/${company.id}/edit`); }} aria-label={t('company_edit')}>
-                      {t('company_edit')}
+                    <MenuItem onClick={() => { handleMenuClose(); setShowEditCompany(!showEditCompany); }} aria-label={t('company_edit')}>
+                      {showEditCompany ? t('company_cancelEdit') : t('company_edit')}
                     </MenuItem>
                   </Menu>
                 </Box>
@@ -809,6 +1071,170 @@ const CreateTransportCompany = () => {
                 </Grid>
               </CardContent>
             </Card>
+            <Collapse in={showEditCompany}>
+              <Card sx={{ mt: 2, mb: 4 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <BusinessIcon /> {t('company_editTitle')}
+                  </Typography>
+                  <Formik
+                    initialValues={{
+                      companyName: company.name,
+                      headquartersLocation: company.headquarters_location,
+                      contactPhone: company.contact_phone,
+                      contactEmail: company.contact_email,
+                      operationalScope: company.operational_scope,
+                      logoFile: null,
+                      submit: null,
+                    }}
+                    validationSchema={Yup.object().shape({
+                      companyName: Yup.string().max(255).required(t('company_nameRequired')),
+                      headquartersLocation: Yup.string().max(255).required(t('company_locationRequired')),
+                      contactPhone: Yup.string().required(t('company_phoneRequired')),
+                      contactEmail: Yup.string().email(t('company_invalidEmail')).max(255).required(t('company_emailRequired')),
+                      operationalScope: Yup.string().oneOf(['regional', 'international']).required(t('company_scopeRequired')),
+                      logoFile: Yup.mixed().nullable()
+                        .test('fileType', t('company_invalidFileType'), value => !value || ['image/jpeg', 'image/png', 'image/gif'].includes(value.type))
+                        .test('fileSize', t('company_fileSizeLimit'), value => !value || value.size <= 5 * 1024 * 1024),
+                    })}
+                    onSubmit={handleUpdateCompany}
+                  >
+                    {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values, setFieldValue }) => (
+                      <Box component="form" noValidate onSubmit={handleSubmit}>
+                        <Grid container spacing={2}>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              fullWidth
+                              error={Boolean(touched.companyName && errors.companyName)}
+                              helperText={touched.companyName && errors.companyName}
+                              label={t('company_name')}
+                              margin="normal"
+                              name="companyName"
+                              onBlur={handleBlur}
+                              onChange={handleChange}
+                              value={values.companyName}
+                              variant="outlined"
+                              InputProps={{ startAdornment: <BusinessIcon sx={{ mr: 1, color: 'action.active' }} /> }}
+                              aria-label={t('company_name')}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              fullWidth
+                              error={Boolean(touched.headquartersLocation && errors.headquartersLocation)}
+                              helperText={touched.headquartersLocation && errors.headquartersLocation}
+                              label={t('company_headquarters')}
+                              margin="normal"
+                              name="headquartersLocation"
+                              onBlur={handleBlur}
+                              onChange={handleChange}
+                              value={values.headquartersLocation}
+                              variant="outlined"
+                              InputProps={{ startAdornment: <LocationOnIcon sx={{ mr: 1, color: 'action.active' }} /> }}
+                              aria-label={t('company_headquarters')}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth margin="normal" error={Boolean(touched.contactPhone && errors.contactPhone)}>
+                              <PhoneInput
+                                international
+                                defaultCountry="US"
+                                value={values.contactPhone}
+                                onChange={value => setFieldValue('contactPhone', value)}
+                                onBlur={handleBlur}
+                                placeholder={t('company_phonePlaceholder')}
+                                style={{
+                                  padding: '10px',
+                                  border: errors.contactPhone && touched.contactPhone ? '1px solid red' : '1px solid #ccc',
+                                  borderRadius: '4px',
+                                }}
+                                aria-label={t('company_phone')}
+                              />
+                              {touched.contactPhone && errors.contactPhone && (
+                                <FormHelperText error>{errors.contactPhone}</FormHelperText>
+                              )}
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <TextField
+                              fullWidth
+                              error={Boolean(touched.contactEmail && errors.contactEmail)}
+                              helperText={touched.contactEmail && errors.contactEmail}
+                              label={t('company_email')}
+                              margin="normal"
+                              name="contactEmail"
+                              onBlur={handleBlur}
+                              onChange={handleChange}
+                              value={values.contactEmail}
+                              variant="outlined"
+                              InputProps={{ startAdornment: <EmailIcon sx={{ mr: 1, color: 'action.active' }} /> }}
+                              aria-label={t('company_email')}
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth margin="normal">
+                              <InputLabel>{t('company_operationalScope')}</InputLabel>
+                              <Select
+                                name="operationalScope"
+                                value={values.operationalScope}
+                                onChange={handleChange}
+                                onBlur={handleBlur}
+                                error={Boolean(touched.operationalScope && errors.operationalScope)}
+                                aria-label={t('company_operationalScope')}
+                              >
+                                <MenuItem value="regional">{t('company_scopeRegional')}</MenuItem>
+                                <MenuItem value="international">{t('company_scopeInternational')}</MenuItem>
+                              </Select>
+                              {touched.operationalScope && errors.operationalScope && (
+                                <FormHelperText error>{errors.operationalScope}</FormHelperText>
+                              )}
+                            </FormControl>
+                          </Grid>
+                          <Grid item xs={12} sm={6}>
+                            <FormControl fullWidth margin="normal" error={Boolean(touched.logoFile && errors.logoFile)}>
+                              <Input
+                                type="file"
+                                accept="image/*"
+                                onChange={event => setFieldValue('logoFile', event.currentTarget.files[0])}
+                                onBlur={handleBlur}
+                                name="logoFile"
+                                sx={{ pt: 1 }}
+                                aria-label={t('company_logo')}
+                              />
+                              {touched.logoFile && errors.logoFile && (
+                                <FormHelperText error>{errors.logoFile}</FormHelperText>
+                              )}
+                            </FormControl>
+                          </Grid>
+                        </Grid>
+                        <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
+                          <Button
+                            color="secondary"
+                            variant="outlined"
+                            startIcon={<CancelIcon />}
+                            onClick={() => setShowEditCompany(false)}
+                            sx={{ flex: 1 }}
+                            aria-label={t('company_cancel')}
+                          >
+                            {t('company_cancel')}
+                          </Button>
+                          <Button
+                            color="primary"
+                            disabled={isSubmitting}
+                            type="submit"
+                            variant="contained"
+                            sx={{ flex: 1 }}
+                            aria-label={t('company_updateAgency')}
+                          >
+                            {t('company_updateAgency')}
+                          </Button>
+                        </Box>
+                      </Box>
+                    )}
+                  </Formik>
+                </CardContent>
+              </Card>
+            </Collapse>
 
             {roleFlags.canRequestElevation && (
               <Box sx={{ mb: 4 }}>
@@ -1022,14 +1448,14 @@ const CreateTransportCompany = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredAgencies.length === 0 ? (
+                  {memoizedFilteredAgencies.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={6} align="center">
                         {searchQuery ? t('company_noSearchResults') : t('company_noAgencies', { action: roleFlags.canCreateAgency ? t('company_addAgencyAction') : t('company_contactAdminAction') })}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredAgencies.map(agency => (
+                    memoizedFilteredAgencies.map(agency => (
                       <TableRow key={agency.id} aria-label={t('company_agencyRow', { name: agency.name })}>
                         <TableCell>{agency.name}</TableCell>
                         <TableCell>{agency.address}</TableCell>

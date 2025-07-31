@@ -1,9 +1,5 @@
 import NavigationOutlinedIcon from '@mui/icons-material/NavigationOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import ContactSupportOutlinedIcon from '@mui/icons-material/ContactSupportOutlined';
-import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
-import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
-import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import DirectionsBusOutlinedIcon from '@mui/icons-material/DirectionsBusOutlined';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
@@ -14,10 +10,6 @@ import MessageOutlinedIcon from '@mui/icons-material/MessageOutlined';
 const icons = {
   NavigationOutlinedIcon,
   HomeOutlinedIcon,
-  ContactSupportOutlinedIcon,
-  BlockOutlinedIcon,
-  SecurityOutlinedIcon,
-  HelpOutlineOutlinedIcon,
   DirectionsBusOutlinedIcon,
   MapOutlinedIcon,
   PeopleAltOutlinedIcon,
@@ -41,31 +33,6 @@ export default {
           type: 'item',
           icon: icons['HomeOutlinedIcon'],
           url: '/dashboard/default'
-        }
-      ]
-    },
-    {
-      id: 'authentication',
-      title: 'Authentication',
-      caption: 'User Access',
-      type: 'group',
-      icon: icons['SecurityOutlinedIcon'],
-      children: [
-        {
-          id: 'login',
-          title: 'Login',
-          type: 'item',
-          url: '/application/login',
-          icon: icons['SecurityOutlinedIcon'],
-          target: true
-        },
-        {
-          id: 'register',
-          title: 'Register',
-          type: 'item',
-          url: '/application/register',
-          icon: icons['SecurityOutlinedIcon'],
-          target: true
         }
       ]
     },
@@ -124,36 +91,6 @@ export default {
           type: 'item',
           url: '/views/Messages',
           icon: icons['MessageOutlinedIcon']
-        }
-      ]
-    },
-    {
-      id: 'support',
-      title: 'Support',
-      caption: 'Help & Resources',
-      type: 'group',
-      icon: icons['ContactSupportOutlinedIcon'],
-      children: [
-        {
-          id: 'documentation',
-          title: 'Documentation',
-          type: 'item',
-          url: 'https://codedthemes.gitbook.io/materially-react-material-documentation/',
-          icon: icons['HelpOutlineOutlinedIcon'],
-          chip: {
-            label: 'Help?',
-            color: 'primary'
-          },
-          external: true,
-          target: true
-        },
-        {
-          id: 'disabled-menu',
-          title: 'Disabled Menu',
-          type: 'item',
-          url: '#',
-          icon: icons['BlockOutlinedIcon'],
-          disabled: true
         }
       ]
     }

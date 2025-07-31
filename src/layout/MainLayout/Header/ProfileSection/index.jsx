@@ -16,11 +16,8 @@ import {
   Tooltip
 } from '@mui/material';
 import PersonTwoToneIcon from '@mui/icons-material/PersonTwoTone';
-import DraftsTwoToneIcon from '@mui/icons-material/DraftsTwoTone';
-import LockOpenTwoToneIcon from '@mui/icons-material/LockOpenTwoTone';
-import SettingsTwoToneIcon from '@mui/icons-material/SettingsTwoTone';
-import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import MeetingRoomTwoToneIcon from '@mui/icons-material/MeetingRoomTwoTone';
+import AccountCircleTwoToneIcon from '@mui/icons-material/AccountCircleTwoTone';
 import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation, useLanguage } from './LanguageContext';
 
@@ -133,15 +130,6 @@ const ProfileSection = () => {
                   }}
                 >
                   <ListItemButton
-                    selected={selectedIndex === 0}
-                    onClick={(event) => handleListItemClick(event, 0, '/application/settings')}
-                  >
-                    <ListItemIcon>
-                      <SettingsTwoToneIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t('profile_settings')} />
-                  </ListItemButton>
-                  <ListItemButton
                     selected={selectedIndex === 1}
                     onClick={(event) => handleListItemClick(event, 1, '/application/profile')}
                   >
@@ -149,24 +137,6 @@ const ProfileSection = () => {
                       <PersonTwoToneIcon />
                     </ListItemIcon>
                     <ListItemText primary={t('profile_profile')} />
-                  </ListItemButton>
-                  <ListItemButton
-                    selected={selectedIndex === 2}
-                    onClick={(event) => handleListItemClick(event, 2, '/application/messages')}
-                  >
-                    <ListItemIcon>
-                      <DraftsTwoToneIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t('profile_messages')} />
-                  </ListItemButton>
-                  <ListItemButton
-                    selected={selectedIndex === 3}
-                    onClick={(event) => handleListItemClick(event, 3, '/application/lock-screen')}
-                  >
-                    <ListItemIcon>
-                      <LockOpenTwoToneIcon />
-                    </ListItemIcon>
-                    <ListItemText primary={t('profile_lockScreen')} />
                   </ListItemButton>
                   <ListItemButton
                     selected={selectedIndex === 4}
