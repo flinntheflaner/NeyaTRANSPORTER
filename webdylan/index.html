@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Next Gen Handyman Services | Ontario & Quebec 24/7 Emergency</title>
+  <meta name="description" content="24/7 Handyman – Ontario & Quebec: Plumbing, Electrical, Renovations, Basements, CCTV. Service Plan from $375/year.">
+  <link rel="icon" href="/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    :root{
+      --brand:#0056b3;--accent:#28a745;--bg:#f8f9fa;--card:#ffffff;--radius:20px;--max:1280px;--transition:all .35s ease;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:#222;line-height:1.7;overflow-x:hidden}
+    a{color:var(--brand);text-decoration:none}
+    img,video{max-width:100%;display:block;border-radius:12px;height:auto}
+    .top-bar{background:#003d80;color:white;text-align:center;padding:12px;font-weight:800;font-size:1.15rem}
+    
+    header{background:linear-gradient(90deg,var(--brand),#004494);color:white;position:sticky;top:0;z-index:1000;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+    .nav{max-width:var(--max);margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;min-height:80px;flex-wrap:wrap;gap:12px}
+    .logo{font-size:2rem;font-weight:900;letter-spacing:-1px}
+    .tagline{font-size:0.9rem;font-weight:500;opacity:0.9;margin-top:4px}
+    nav ul{display:flex;gap:24px;list-style:none;flex-wrap:wrap;justify-content:center}
+    nav a{color:white;font-weight:500;font-size:0.95rem;position:relative}
+    nav a::after{content:'';position:absolute;bottom:-8px;left:0;width:0;height:2px;background:white;transition:var(--transition)}
+    nav a:hover::after{width:100%}
+    .call-btn{background:var(--accent);color:white;padding:10px 20px;border-radius:50px;font-weight:600;font-size:0.9rem;display:flex;align-items:center;gap:8px;white-space:nowrap}
+    .mobile-toggle{display:none;cursor:pointer;font-size:1.9rem;color:white}
+    .mobile-nav{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--brand);padding:90px 20px 20px;transform:translateX(-100%);transition:.4s;z-index:999;opacity:0;overflow-y:auto}
+    .mobile-nav.active{transform:translateX(0);opacity:1}
+    .mobile-nav a{display:block;padding:16px 20px;color:white;font-size:1.3rem;border-bottom:1px solid rgba(255,255,255,.1)}
+
+    .hero{background:linear-gradient(135deg,rgba(0,86,179,.96),rgba(0,61,128,.96)),url('https://images.unsplash.com/photo-1581093458791-9ea30cba0f5f?ixlib=rb-4.0.3&auto=format&fit=crop&q=80') center/cover no-repeat;padding:140px 20px 100px;color:white;text-align:center}
+    .hero h1{font-size:2.8rem;font-weight:900;line-height:1.2;margin-bottom:16px}
+    .hero .lead{font-size:1.15rem;max-width:900px;margin:0 auto 28px;opacity:.95}
+    .cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+    .btn{padding:16px 32px;border-radius:50px;font-weight:600;font-size:1rem;display:inline-flex;align-items:center;gap:10px;transition:var(--transition);min-width:200px;justify-content:center}
+    .btn-primary{background:white;color:var(--brand);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .btn-primary:hover{transform:translateY(-5px)}
+    .btn-outline{border:2.5px solid white;color:white}
+    .btn-outline:hover{background:white;color:var(--brand)}
+
+    .container{max-width:var(--max);margin:0 auto;padding:70px 20px}
+    h2{font-size:2.5rem;text-align:center;margin-bottom:50px;color:var(--brand);font-weight:800}
+
+    .about-section{background:linear-gradient(135deg,#f0f7ff,#e1f0ff);padding:80px 20px;text-align:center}
+    .about-inner{max-width:1000px;margin:0 auto}
+    .about-section h2{font-size:2.6rem;margin-bottom:24px}
+    .about-section p{font-size:1.15rem;line-height:1.9;color:#333;margin-bottom:20px;max-width:900px;margin-left:auto;margin-right:auto}
+
+    .services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px}
+    .card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.08);transition:var(--transition);cursor:pointer}
+    .card:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(0,0,0,.18)}
+    .card img{width:100%;height:220px;object-fit:cover}
+    .card-body{padding:24px;text-align:center}
+    .card h3{font-size:1.4rem;margin-bottom:10px;color:var(--brand);font-weight:700}
+
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:10000;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+    .modal.active{display:flex}
+    .modal-content{background:white;max-width:720px;width:100%;border-radius:20px;overflow:hidden}
+    .modal-header{background:var(--brand);color:white;padding:20px;text-align:center;position:relative}
+    .modal-header h3{font-size:1.8rem;font-weight:700}
+    .modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:white;font-size:2rem;cursor:pointer}
+    .modal-body{padding:28px;line-height:1.9;font-size:1.05rem}
+    .modal-body ul{padding-left:24px;margin:16px 0}
+    .modal-body li{margin:10px 0}
+
+    /* SERVICE PLAN – 100% FIXED, NO OVERLAP ON ANY PHONE */
+    .plan-box{background:linear-gradient(135deg,#e3f2fd,#bbdefb);padding:44px 28px;border-radius:20px;text-align:center;box-shadow:0 15px 40px rgba(0,0,0,.1);margin:0 auto;max-width:800px}
+    .plan-box h3{font-size:2.3rem;margin-bottom:16px;line-height:1.3}
+    .plan-price{font-size:3.2rem;font-weight:900;color:var(--brand);margin:16px 0}
+    .plan-features{list-style:none;padding:0;margin:32px 0;display:flex;flex-direction:column;gap:18px}
+    .plan-features li{
+      font-size:1.18rem;
+      position:relative;
+      padding-left:48px;
+      text-align:left;
+      display:flex;
+      align-items:flex-start;
+      gap:14px;
+    }
+    .plan-features li i{
+      color:var(--accent);
+      font-size:1.6rem;
+      font-weight:900;
+      flex-shrink:0;
+      margin-top:2px;
+    }
+
+    .accordion-header{background:var(--brand);color:white;padding:18px 20px;border-radius:12px;cursor:pointer;font-size:1.3rem;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .accordion-header i{transition:transform .3s}
+    .accordion-content{max-height:0;overflow:hidden;transition:max-height .6s ease;padding:0 20px;background:#f9f9f9}
+    .accordion-content.active{max-height:12000px;padding:30px 20px}
+    .gallery-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:20px}
+    .gallery-item{overflow:hidden;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,.12);transition:.3s;height:240px;position:relative}
+    .gallery-item:hover{transform:scale(1.03)}
+    .gallery-item img,.gallery-item video{width:100%;height:100%;object-fit:cover}
+
+    .map-container{height:380px;border-radius:20px;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,.2);margin:40px 0}
+
+    footer{background:var(--brand);color:white;padding:70px 20px 40px}
+    .footer-grid{max-width:var(--max);margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px}
+
+    /* CHATBOT – ICON BACK AND BEAUTIFUL */
+    #handyman-chatbot{position:fixed;bottom:16px;right:16px;width:370px;max-width:94vw;background:white;border-radius:20px;box-shadow:0 15px 50px rgba(0,0,0,0.3);z-index:9999;overflow:hidden;transition:transform .4s ease;transform:translateY(120%)}
+    #handyman-chatbot.open{transform:translateY(0)}
+    .chat-header{background:linear-gradient(135deg,var(--brand),#004494);color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+    .chat-header h3{font-size:1.1rem;margin:0}
+    .chat-body{height:420px;padding:18px;background:#f9f9f9;display:flex;flex-direction:column;gap:14px;overflow-y:auto;font-size:0.94rem}
+    .message{padding:11px 16px;border-radius:18px;max-width:82%;word-wrap:break-word}
+    .bot{background:var(--brand);color:white;align-self:flex-start}
+    .user{background:#e9ecef;color:#333;align-self:flex-end}
+    .typing span{width:9px;height:9px;background:var(--brand);border-radius:50%;display:inline-block;animation:bounce 1.2s infinite}
+    .typing span:nth-child(2){animation-delay:.2s}
+    .typing span:nth-child(3){animation-delay:.4s}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .chat-footer{padding:14px;background:white;border-top:1px solid #eee;display:flex;gap:10px}
+    .chat-footer input{flex:1;padding:12px 16px;border:1px solid #ddd;border-radius:50px;font-size:0.94rem}
+    .chat-footer button{background:var(--accent);color:white;width:44px;height:44px;border:none;border-radius:50%;cursor:pointer;font-size:1.2rem}
+    .chat-toggle{position:fixed;bottom:20px;right:20px;width:62px;height:62px;background:var(--brand);color:white;border-radius:50%;box-shadow:0 12px 35px rgba(0,86,179,0.6);display:flex;align-items:center;justify-content:center;font-size:2.6rem;cursor:pointer;z-index:9998;animation:pulse 2.5s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,86,179,0.7)}70%{box-shadow:0 0 0 18px rgba(0,86,179,0)}100%{box-shadow:0 0 0 0 rgba(0,86,179,0)}}
+
+    @media(max-width:992px){
+      .hero h1{font-size:2.5rem}
+      .about-section h2{font-size:2.3rem}
+    }
+    @media(max-width:768px){
+      .hero{padding:110px 20px 90px}
+      .hero h1{font-size:2.3rem}
+      .hero .lead{font-size:1.1rem}
+      nav ul,.call-btn{display:none}
+      .mobile-toggle{display:block}
+      .services-grid{grid-template-columns:1fr}
+      .gallery-grid{grid-template-columns:repeat(2,1fr)}
+      .plan-box{padding:36px 20px}
+      .plan-features li{font-size:1.12rem;padding-left:42px;gap:12px}
+      .plan-features li i{font-size:1.5rem}
+    }
+    @media(max-width:480px){
+      .hero h1{font-size:2rem}
+      .hero .lead{font-size:1rem}
+      .btn{padding:14px 28px;font-size:0.95rem;min-width:180px}
+      .top-bar{font-size:1rem}
+      .logo{font-size:1.7rem}
+      .about-section h2{font-size:2rem}
+      .about-section p{font-size:1.05rem}
+      .gallery-grid{grid-template-columns:1fr}
+      .gallery-item{height:280px}
+      .plan-box{padding:36px 18px}
+      .plan-price{font-size:2.6rem}
+      .plan-features li{font-size:1.1rem;padding-left:38px;gap:10px}
+      .plan-features li i{font-size:1.4rem}
+      #handyman-chatbot{width:96vw;right:2vw;bottom:12px}
+      .chat-body{height:380px}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">Next Gen Handyman Services – Serving Ontario & Quebec 24/7</div>
+
+  <header>
+    <div class="nav">
+      <div>
+        <div class="logo">Next Gen Handyman</div>
+        <div class="tagline">24/7 Emergency • Ontario & Quebec Wide</div>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#plan">Service Plan</a></li>
+          <li><a href="#work">Our Work</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+      <a href="tel:+14372269061" class="call-btn"><i class="fas fa-phone-volume"></i> 24/7: (437) 226-9061</a>
+      <div class="mobile-toggle" onclick="document.querySelector('.mobile-nav').classList.toggle('active')">
+        <i class="fas fa-bars"></i>
+      </div>
+    </div>
+    <div class="mobile-nav">
+      <a href="#services">Services</a>
+      <a href="#plan">Service Plan</a>
+      <a href="#work">Our Work</a>
+      <a href="#contact">Contact</a>
+      <a href="tel:+14372269061"><i class="fas fa-phone"></i> Call 24/7: (437) 226-9061</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container" style="max-width:1100px">
+      <p style="font-weight:600;font-size:1.1rem;background:rgba(255,255,255,.15);display:inline-block;padding:8px 18px;border-radius:50px">24/7 Emergency Response – Ontario & Quebec</p>
+      <h1>We Fix It Right – Anytime, Anywhere</h1>
+      <p class="lead">
+        Emergency plumbing & electrical • Renovations • CCTV • TV mounting • Basements • Kitchens • Flooring<br>
+        Serving Toronto • Ottawa • Mississauga • Montreal • Gatineau • Hamilton • London • Kitchener • Laval • Quebec City & beyond<br>
+        <strong>New customers get 10% off any service!</strong>
+      </p>
+      <div class="cta-row">
+        <a href="tel:+14372269061" class="btn btn-primary"><i class="fas fa-bolt"></i> Call Now: (437) 226-9061</a>
+        <a href="#contact" class="btn btn-outline"><i class="fas fa-envelope"></i> Free Quote</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section">
+    <div class="about-inner">
+      <h2>Why Choose Next Gen Handyman?</h2>
+      <p>We are standing where you need us to be. We believe in providing <strong>quality services</strong> with a timely and professional outcome. We are <strong>Next Gen Handyman Services</strong>.</p>
+      <p>Our ability is to make your construction needs come to life in a vibrant and stunning way — that would make you call our name first before any other. We are the vision of <strong>affordability and professionalism</strong>.</p>
+      <p>We provide <strong>quality and timeless services</strong> to all prospective customers. We pride ourselves on specialized services like painting, plumbing, framing, flooring, stairs, kitchens, basements, bathrooms and much more. We also do <strong>load-bearing installation</strong> of any kind (steel, LVL or wood).</p>
+      <p>With <strong>over 20 years of collective experience</strong>, our reach is unlimited — we will go anywhere in Ontario and Quebec. Need engineering services? We’ve got you covered.</p>
+      <p>We will do the talking and the walking to get your project going. <strong>Your time is valuable to us.</strong></p>
+      <p style="margin-top:40px">
+        <a href="tel:+14372269061" class="btn btn-primary" style="padding:20px 50px;font-size:1.3rem">
+          <i class="fas fa-phone"></i> Book Appointment – (437) 226-9061
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <section id="services" class="container">
+    <h2>Our Professional Services</h2>
+    <div class="services-grid">
+      <div class="card" onclick="openModal('Technical Services','• Plumbing repairs & installs<br>• Electrical work (ESA licensed)<br>• Light fixture replacement<br>• CCTV installation<br>• TV wall mounting<br>• Smart home setup<br>• EV charger install')">
+        <img src="image/10.jpeg" alt="Technical Services">
+        <div class="card-body"><h3>Technical Services</h3><p>Plumbing • Electrical • CCTV • TV Mount</p></div>
+      </div>
+      <div class="card" onclick="openModal('Carpentry & Framing','• Trim, cabinets, doors<br>• Load-bearing beams (steel, LVL, wood)<br>• Framing & structural work')">
+        <img src="image/4.jpeg" alt="Carpentry"><div class="card-body"><h3>Carpentry & Framing</h3><p>Trim, cabinets, structural</p></div>
+      </div>
+      <div class="card" onclick="openModal('Painting','• Interior & exterior painting<br>• Drywall repair & prep<br>• Color consultation')">
+        <img src="image/5.jpeg" alt="Painting"><div class="card-body"><h3>Painting</h3><p>Interior & exterior perfection</p></div>
+      </div>
+      <div class="card" onclick="openModal('Flooring','• Hardwood, laminate, vinyl<br>• Tile & carpet installation<br>• Repairs & refinishing')">
+        <img src="image/6.jpeg" alt="Flooring"><div class="card-body"><h3>Flooring</h3><p>All types installed & repaired</p></div>
+      </div>
+      <div class="card" onclick="openModal('Assembly','• IKEA & furniture assembly<br>• Sheds & playgrounds<br>• Shelving & storage')">
+        <img src="image/7.jpeg" alt="Assembly"><div class="card-body"><h3>Assembly</h3><p>Furniture, sheds, IKEA</p></div>
+      </div>
+      <div class="card" onclick="openModal('Safety & Mobility','• Grab bars & railings<br>• Ramps & accessibility<br>• Childproofing')">
+        <img src="image/8.jpeg" alt="Safety"><div class="card-body"><h3>Safety & Mobility</h3><p>Grab bars, ramps, railings</p></div>
+      </div>
+      <div class="card" onclick="openModal('Windows & Doors','• Installation & replacement<br>• Weather sealing<br>• Locks & hardware')">
+        <img src="image/9.jpeg" alt="Windows"><div class="card-body"><h3>Windows & Doors</h3><p>Install, repair, seal</p></div>
+      </div>
+      <div class="card" onclick="openModal('Drywall & Ceiling','• Patch & repair<br>• Full installation<br>• Popcorn ceiling removal')">
+        <img src="image/11.jpeg" alt="Drywall"><div class="card-body"><h3>Drywall & Ceiling</h3><p>Patch, replace, texture</p></div>
+      </div>
+      <div class="card" onclick="openModal('Complete Basements','• Full finishing<br>• Framing, insulation, drywall<br>• Flooring & lighting')">
+        <img src="image/12.jpeg" alt="Basements"><div class="card-body"><h3>Complete Basements</h3><p>Full finishing & renovations</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Modal -->
+  <div id="serviceModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Service Details</h3>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div style="padding:30px;text-align:center;background:#f8f9fa">
+        <a href="tel:+14372269061" class="btn btn-primary"><i class="fas fa-phone"></i> Call Now: (437) 226-9061</a>
+      </div>
+    </div>
+  </div>
+
+  <section id="plan" class="container">
+    <h2>Home Service Plan – Starting at $375/year</h2>
+    <div class="plan-box">
+      <h3>Peace of Mind All Year Round</h3>
+      <div class="plan-price">$375<span style="font-size:1.2rem">/year</span></div>
+      <ul class="plan-features">
+        <li><i class="fas fa-check"></i> Window cleaning – 8 times per year</li>
+        <li><i class="fas fa-check"></i> Yearly smoke detector inspection & battery replacement</li>
+        <li><i class="fas fa-check"></i> Annual AC service & cleaning</li>
+        <li><i class="fas fa-check"></i> Leaky faucet repair or replacement</li>
+        <li><i class="fas fa-check"></i> Toilet flapper replacement (1–2 times)</li>
+        <li><i class="fas fa-check"></i> Basic light fixture replacement (once)</li>
+        <li><i class="fas fa-check"></i> Priority 24/7 emergency response</li>
+        <li><i class="fas fa-check"></i> 10% discount on all additional services</li>
+      </ul>
+      <p style="margin-top:32px">
+        <a href="tel:+14372269061" class="btn btn-primary" style="padding:18px 50px;font-size:1.3rem">
+          <i class="fas fa-phone"></i> Call to Join – (437) 226-9061
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <section id="work" class="container">
+    <h2>Our Recent Work Across Ontario & Quebec</h2>
+    <p style="text-align:center;max-width:900px;margin:0 auto 40px;font-size:1.2rem;color:#555">
+      Real jobs, real results – Click to view gallery
+    </p>
+    <div class="accordion">
+      <div class="accordion-header" onclick="this.nextElementSibling.classList.toggle('active');this.querySelector('i').classList.toggle('fa-chevron-down');this.querySelector('i').classList.toggle('fa-chevron-up')">
+        View All Completed Projects (30+ Jobs) <i class="fas fa-chevron-down"></i>
+      </div>
+      <div class="accordion-content">
+        <div class="gallery-grid">
+          <div class="gallery-item"><img src="image/12.jpeg" alt="Basement"></div>
+          <div class="gallery-item"><img src="image/13.jpeg" alt="Kitchen"></div>
+          <div class="gallery-item"><img src="image/14.jpeg" alt="Bathroom"></div>
+          <div class="gallery-item"><img src="image/15.jpeg" alt="Flooring"></div>
+          <div class="gallery-item"><img src="image/16.jpeg" alt="Painting"></div>
+          <div class="gallery-item"><img src="image/17.jpeg" alt="TV Mount"></div>
+          <div class="gallery-item"><img src="image/18.jpeg" alt="CCTV"></div>
+          <div class="gallery-item"><img src="image/19.jpeg" alt="Electrical"></div>
+          <div class="gallery-item"><img src="image/20.jpeg" alt="Plumbing"></div>
+          <div class="gallery-item"><img src="image/21.jpeg" alt="Drywall"></div>
+          <div class="gallery-item"><img src="image/22.jpeg" alt="Window"></div>
+          <div class="gallery-item"><img src="image/23.jpeg" alt="Door"></div>
+          <div class="gallery-item"><img src="image/24.jpeg" alt="Assembly"></div>
+          <div class="gallery-item"><img src="image/25.jpeg" alt="Safety"></div>
+          <div class="gallery-item"><img src="image/27.jpeg" alt="Ottawa"></div>
+          <div class="gallery-item"><img src="image/28.jpeg" alt="Montreal"></div>
+          <div class="gallery-item"><img src="image/29.jpeg" alt="Gatineau"></div>
+          <div class="gallery-item"><img src="image/30.jpeg" alt="Mississauga"></div>
+          <div class="gallery-item"><img src="image/31.jpeg" alt="Job 31"></div>
+          <div class="gallery-item"><img src="image/32.jpeg" alt="Job 32"></div>
+          <div class="gallery-item"><img src="image/33.jpeg" alt="Job 33"></div>
+          <div class="gallery-item">
+            <video controls poster="image/34-poster.jpeg">
+              <source src="image/34.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          <div class="gallery-item">
+            <video controls poster="image/35-poster.jpeg">
+              <source src="image/35.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="container">
+    <h2>Get Your Free Quote – Available 24/7</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px">
+      <form class="card" style="padding:36px" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <label>Full Name *</label><input type="text" name="name" required>
+        <label>Email *</label><input type="email" name="email" required>
+        <label>Phone *</label><input type="tel" name="phone" required>
+        <label>City / Area</label><input type="text" name="city" placeholder="e.g. Ottawa, Montreal">
+        <label>Service Needed</label>
+        <select name="service">
+          <option>Emergency Repair</option>
+          <option>Technical Services</option>
+          <option>Renovation</option>
+          <option>Load-Bearing Work</option>
+          <option>Service Plan</option>
+          <option>Other</option>
+        </select>
+        <label>Message</label>
+        <textarea name="message" rows="5" placeholder="Describe your project..."></textarea>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:18px;justify-content:center">Send Request</button>
+      </form>
+      <div class="card" style="padding:36px">
+        <h3>24/7 Ontario & Quebec Service</h3>
+        <p><strong>Call Anytime:</strong> <a href="tel:+14372269061">(437) 226-9061</a></p>
+        <p><strong>Email:</strong> kumdiland30@gmail.com</p>
+        <p><strong>Cities:</strong> Toronto • Ottawa • Montreal • Mississauga • Gatineau • Hamilton • London • Kitchener • Laval • Quebec City</p>
+        <p><strong>New customers get 10% off first job!</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <h2 style="color:white;text-align:center;margin-bottom:40px">We Serve All of Ontario & Quebec</h2>
+      <div class="map-container">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d359482.946229029!2d-79.382799!3d45.421529!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91a541c64b70d%3A0x9e1f47d7fe6ef18c!2sToronto%2C%20ON!5e0!3m2!1sen!2sca!4v1733100000000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <div class="footer-grid" style="margin-top:50px">
+        <div><strong>Next Gen Handyman Services</strong><br>Serving Ontario & Quebec 24/7</div>
+        <div><strong>Call:</strong> <a href="tel:+14372269061">(437) 226-9061</a><br><strong>Email:</strong> kumdiland30@gmail.com</div>
+        <div>Toronto • Ottawa • Montreal • Gatineau • Mississauga • Brampton • Hamilton • London • Kitchener • Laval • Quebec City & beyond</div>
+      </div>
+      <p style="text-align:center;margin-top:50px">© 2025 Next Gen Handyman Services • All Rights Reserved</p>
+    </div>
+  </footer>
+
+  <!-- CHATBOT WITH ICON -->
+  <div id="handyman-chatbot">
+    <div class="chat-header" onclick="toggleChat()">
+      <div><h3>Next Gen Assistant</h3><small>Online 24/7 – How can we help?</small></div>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="chat-body" id="chatBody">
+      <div class="message bot">Hi! Need emergency help or our $375/year plan?</div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" id="userInput" placeholder="Type your city or question..." autocomplete="off">
+      <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+  <div class="chat-toggle" onclick="toggleChat()"><i class="fas fa-comments"></i></div>
+
+  <script>
+    const chatBody = document.getElementById('chatBody');
+    const userInput = document.getElementById('userInput');
+    const chatbot = document.getElementById('handyman-chatbot');
+
+    function toggleChat() {
+      chatbot.classList.toggle('open');
+      if (chatbot.classList.contains('open')) userInput.focus();
+    }
+
+    function addMessage(text, type = 'bot') {
+      const msg = document.createElement('div');
+      msg.className = `message ${type}`;
+      msg.innerHTML = text.replace(/\n/g, '<br>');
+      chatBody.appendChild(msg);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      userInput.value = '';
+      const typing = document.createElement('div');
+      typing.className = 'message bot typing';
+      typing.innerHTML = '<span></span><span></span><span></span>';
+      chatBody.appendChild(typing);
+      setTimeout(() => {
+        typing.remove();
+        const lower = text.toLowerCase();
+        if (lower.includes('emergency') || lower.includes('leak') || lower.includes('urgent')) {
+          addMessage(`EMERGENCY RESPONSE!\nCall now: <a href="tel:+14372269061" style="color:white;text-decoration:underline">(437) 226-9061</a>`);
+        } else if (lower.includes('plan') || lower.includes('375')) {
+          addMessage(`Our Home Service Plan is only $375/year!\nCall: <a href="tel:+14372269061" style="color:white;text-decoration:underline">(437) 226-9061</a>`);
+        } else {
+          addMessage(`We serve all Ontario & Quebec 24/7!\nCall anytime: <a href="tel:+14372269061" style="color:white;text-decoration:underline">(437) 226-9061</a>`);
+        }
+      }, 1000);
+    }
+
+    userInput.addEventListener('keypress', e => e.key === 'Enter' && sendMessage());
+
+    setTimeout(() => {
+      if (!chatbot.classList.contains('open')) {
+        addMessage(`Hi! We serve Toronto, Ottawa, Montreal & all Ontario/Quebec 24/7`);
+        toggleChat();
+      }
+    }, 8000);
+
+    function openModal(title, details) {
+      document.getElementById('modalTitle').textContent = title;
+      document.getElementById('modalBody').innerHTML = '<ul style="padding-left:22px;margin:16px 0;line-height:2">' + 
+        details.split('<br>').filter(l=>l.trim()).map(l=>`<li>${l.replace(/^\•\s*/,'')}</li>`).join('') + '</ul>';
+      document.getElementById('serviceModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('serviceModal').classList.remove('active');
+    }
+
+    window.onclick = e => {
+      if (e.target === document.getElementById('serviceModal')) closeModal();
+    }
+  </script>
+</body>
+</html>

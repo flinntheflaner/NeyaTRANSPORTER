@@ -415,7 +415,7 @@ const CreateTransportCompany = () => {
     },
     'Operations Manager': {
       canManageCompany: false,
-      canCreateAgency: true,
+      canCreateAgency: false,
       canUpdateAgency: true,
       canDeleteAgency: false,
       canRequestElevation: false,

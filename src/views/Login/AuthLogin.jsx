@@ -10,6 +10,8 @@ import { Formik } from 'formik';
 import CheckCircle from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import FileCopy from '@mui/icons-material/FileCopy';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { supabase } from './supabase';
@@ -222,6 +224,7 @@ const AuthLogin = ({ ...rest }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userRoles, setUserRoles] = useState([]);
   const [signUpMode, setSignUpMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const withTimeout = async (promise, ms = 10000) => {
     const timeout = new Promise((_, reject) =>
@@ -353,7 +356,6 @@ const AuthLogin = ({ ...rest }) => {
         throw new Error('Échec création utilisateur.');
       }
       alert(`[DEBUG] Créé dans auth.users. id: ${signUpData.user.id}`);
-
       // 2. Insert into public.users
       alert('[DEBUG] Tentative insertion dans public.users');
       const user_id = signUpData.user.id;
@@ -373,7 +375,6 @@ const AuthLogin = ({ ...rest }) => {
         alert('[DEBUG] Erreur insert public.users: ' + JSON.stringify(userInsertError));
         throw new Error("Utilisateur créé mais l'enregistrement du profil a échoué.");
       }
-
       logSuccess('SignUp', 'Utilisateur créé', { user_id });
       alert('[DEBUG] Utilisateur inséré dans public.users');
       toast.success('Compte créé ! Vous pouvez vous connecter.');
@@ -412,7 +413,6 @@ const AuthLogin = ({ ...rest }) => {
         throw new Error('Aucune donnée utilisateur');
       }
       alert('[DEBUG] Connexion réussie avec l\'ID : ' + authData.user.id);
-
       // Fetch user row for role
       const { data: userRow, error: userRowError } = await supabase
         .from('users')
@@ -435,7 +435,6 @@ const AuthLogin = ({ ...rest }) => {
         alert('[DEBUG] Aucune rôle valide');
         throw new Error('Aucun rôle valide. Contactez l’administrateur.');
       }
-
       logSuccess('SignIn', 'Connexion réussie', {
         userId: authData.user.id,
         roles: rolesData,
@@ -580,11 +579,23 @@ const AuthLogin = ({ ...rest }) => {
                 label="Mot de passe"
                 margin="normal"
                 name="password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.password}
                 variant="outlined"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <Button
                 color="primary"

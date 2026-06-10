@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Etobicoke Phone Fix - 24/7 Professional Phone, Tablet & Laptop Repair at 10 Willowridge Road. Same-day fixes, genuine parts, 90-day warranty. Call 437-499-9286">
+    <title>Etobicoke Phone Fix | 24/7 Fast Phone Repair in Etobicoke</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066ff;
+            --secondary: #00d4ff;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            background: var(--light);
+        }
+        a { text-decoration: none; }
+        img { max-width: 100%; display: block; }
+
+        /* Top Bar - 24/7 Highlight */
+        .top-bar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
+        .top-bar i { color: #fff; margin-right: 8px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+        /* Header */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+        .logo span { color: var(--secondary); }
+        .nav-links a {
+            color: white;
+            margin: 0 1.2rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -6px;
+            left: 50%;
+            background: var(--secondary);
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .phone-header {
+            background: var(--success);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+        .phone-header:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1581092580490-4e63cf7ec4c9?ixlib=rb-4.0.3&auto=format&fit=crop&q=80') center/cover no-repeat;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            padding-top: 80px;
+        }
+        .hero-content h1 {
+            font-size: 4.2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        }
+        .hero-content p {
+            font-size: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto 2.5rem;
+            opacity: 0.95;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 36px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0 10px;
+            transition: all 0.4s;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn:hover { transform: translateY(-5px); box-shadow: 0 12px 30px rgba(0,0,0,0.3); }
+
+        /* Sections */
+        section { padding: 100px 5%; max-width: 1400px; margin: 0 auto; }
+        h2 {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 4rem;
+            color: var(--dark);
+        }
+        h2::after {
+            content: '';
+            width: 100px;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            display: block;
+            margin: 20px auto;
+            border-radius: 3px;
+        }
+
+        /* Trust Badges */
+        .trust-badges {
+            text-align: center;
+            padding: 40px 0;
+            background: white;
+            margin: 40px 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        .badges i { color: var(--success); font-size: 2rem; margin-bottom: 10px; }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .service-card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.4s;
+            border: 1px solid #eee;
+        }
+        .service-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 20px 50px rgba(0,102,255,0.15);
+            border-color: var(--primary);
+        }
+        .service-card i {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+
+        /* About & Contact */
+        .about-grid, .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+        .contact-info {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        .info-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            font-size: 1.15rem;
+        }
+        .info-item i {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-right: 1.5rem;
+            width: 50px;
+            padding-top: 4px;
+        }
+        form input, form textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        form input:focus, form textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0,102,255,0.1);
+        }
+
+        .map-container {
+            grid-column: 1 / -1;
+            height: 450px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            margin-top: 3rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 4rem 5% 2rem;
+        }
+        .footer-logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .footer-logo span { color: var(--secondary); }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .about-grid, .contact-grid { grid-template-columns: 1fr; }
+            .hero-content h1 { font-size: 3.2rem; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero-content h1 { font-size: 2.8rem; }
+            .hero-content p { font-size: 1.3rem; }
+            .badges { gap: 2rem; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 24/7 Top Bar -->
+    <div class="top-bar">
+        <i class="fas fa-clock"></i>
+        <strong>OPEN 24 HOURS • 7 DAYS A WEEK • 365 DAYS A YEAR</strong> | Emergency? Call Now: 437-499-9286
+    </div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">Etobicoke <span>Phone Fix</span></div>
+            <div class="nav-links">
+                <a href="#home">Home</a>
+                <a href="#services">Services</a>
+                <a href="#about">About</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <a href="tel:4374999286" class="phone-header">
+                <i class="fas fa-phone-volume"></i> 437-499-9286
+            </a>
+        </nav>
+    </header>
+
+    <!-- Hero -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>24/7 Phone Repair Experts</h1>
+            <p>Cracked screen? Dead battery? Water damage? We're open <strong>24 hours a day, every day</strong> to fix your device fast with genuine parts and 90-day warranty.</p>
+            <div>
+                <a href="tel:4374999286" class="btn btn-success">Call Now: 437-499-9286</a>
+                <a href="#contact" class="btn btn-primary">Get Instant Quote</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Badges -->
+    <div class="trust-badges">
+        <div class="badges">
+            <div><i class="fas fa-shield-alt"></i><br>90-Day Warranty</div>
+            <div><i class="fas fa-tools"></i><br>Genuine Parts</div>
+            <div><i class="fas fa-clock"></i><br>30–60 Min Repairs</div>
+            <div><i class="fas fa-star"></i><br>1000+ 5-Star Reviews</div>
+            <div><i class="fas fa-dollar-sign"></i><br>Best Price Guarantee</div>
+        </div>
+    </div>
+
+    <!-- Services -->
+    <section id="services">
+        <h2>Professional Repair Services</h2>
+        <div class="services-grid">
+            <div class="service-card"><i class="fas fa-mobile-alt"></i><h3>Screen Replacement</h3><p>Premium OLED/LCD screens for iPhone, Samsung, Google Pixel & more</p></div>
+            <div class="service-card"><i class="fas fa-battery-full"></i><h3>Battery Replacement</h3><p>Restore 100% battery health in under 30 minutes</p></div>
+            <div class="service-card"><i class="fas fa-tint"></i><h3>Water Damage Repair</h3><p>Professional ultrasonic cleaning & diagnostics</p></div>
+            <div class="service-card"><i class="fas fa-camera"></i><h3>Camera & Speaker Fix</h3><p>Front/back camera, microphone, speaker repairs</p></div>
+            <div class="service-card"><i class="fas fa-tablet-alt"></i><h3>Tablet & iPad Repair</h3><p>All models including iPad Pro, Air, Mini</p></div>
+            <div class="service-card"><i class="fas fa-laptop"></i><h3>Laptop & MacBook</h3><p>Screen, keyboard, SSD upgrade, virus removal</p></div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" style="background: #fff;">
+        <h2>Why Thousands Trust Us</h2>
+        <div class="about-grid">
+            <div>
+                <h3 style="font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--primary);">Etobicoke's #1 Rated Repair Shop</h3>
+                <p style="font-size: 1.15rem; margin-bottom: 1.5rem;">Located at <strong>10 Willowridge Road</strong>, we're open <strong>24 hours a day, 7 days a week</strong> — even on holidays. Walk-ins always welcome!</p>
+                <ul style="font-size: 1.1rem; line-height: 2.2; margin: 25px 0;">
+                    <li>✓ <strong>24/7 Emergency Service</strong> – We're always here when you need us</li>
+                    <li>✓ 90-Day Warranty on every repair</li>
+                    <li>✓ Certified technicians with 10+ years experience</li>
+                    <li>✓ Genuine OEM parts only</li>
+                    <li>✓ Price match guarantee</li>
+                    <li>✓ No fix = No charge</li>
+                </ul>
+                <a href="tel:4374999286" class="btn btn-success" style="font-size: 1.2rem; padding: 16px 40px;">
+                    <i class="fas fa-phone"></i> Call 24/7: 437-499-9286
+                </a>
+            </div>
+            <div>
+                <img src="https://images.unsplash.com/photo-1581093458791-9ea9a7842c4b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Professional phone repair" style="border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" style="background: #f8fafc;">
+        <h2>Visit or Contact Us 24/7</h2>
+        <div class="contact-grid">
+            <div class="contact-info">
+                <h3 style="font-size: 1.8rem; margin-bottom: 2rem; color: var(--primary);">Store Information</h3>
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div><strong>Address</strong><br>10 Willowridge Road<br>Etobicoke, ON M9R 3Y8</div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-phone"></i>
+                    <div><strong>24/7 Phone</strong><br><a href="tel:4374999286" style="color: var(--primary); font-size: 1.4rem; font-weight: bold;">437-499-9286</a></div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <div><strong>Open 24/7</strong><br>Every day including weekends & holidays</div>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-envelope"></i>
+                    <div><strong>Email</strong><br>sokamtebillgatess@gmail.com</div>
+                </div>
+            </div>
+
+            <div>
+                <h3 style="font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--primary);">Send Us a Message</h3>
+                <form action="https://formspree.io/f/xblrwpga" method="POST">
+                    <input type="text" name="name" placeholder="Your Name" required>
+                    <input type="tel" name="phone" placeholder="Your Phone Number" required>
+                    <input type="email" name="email" placeholder="Your Email (optional)">
+                    <textarea name="message" placeholder="Describe your device issue (model, problem, etc.)" required></textarea>
+                    <button type="submit" class="btn btn-success" style="width: 100%; padding: 16px; font-size: 1.2rem;">
+                        <i class="fas fa-paper-plane"></i> Send Message – We'll Reply Instantly
+                    </button>
+                </form>
+                <p style="margin-top: 15px; color: var(--gray); font-size: 0.95rem;">Messages are answered 24/7 • Usually within minutes</p>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2885.555858846468!2d-79.56524868449607!3d43.69694897911948!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x882b470000000001%3A0x0!2s10%20Willowridge%20Rd%2C%20Etobicoke%2C%20ON%20M9R%203Y8!5e0!3m2!1sen!2sca!4v1700000000000" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Etobicoke <span>Phone Fix</span></div>
+        <p style="font-size: 1.2rem; margin: 1rem 0;">10 Willowridge Road, Etobicoke, ON • Open 24/7 • <a href="tel:4374999286" style="color: var(--secondary);">437-499-9286</a></p>
+        <p>&copy; 2025 Etobicoke Phone Fix. All rights reserved. | 24/7 Professional Device Repair</p>
+    </footer>
+
+</body>
+</html>
